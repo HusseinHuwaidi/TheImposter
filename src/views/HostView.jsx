@@ -16,6 +16,7 @@ import { TextReveal } from '../components/ui/TextReveal';
 import { MagneticButton } from '../components/ui/MagneticButton';
 import { MovingPixels } from '../components/ui/MovingPixels';
 import { useRetroAudio } from '../hooks/useRetroAudio';
+import { usePerformanceMode } from '../hooks/usePerformanceMode';
 import { useKeygenAudio } from '../hooks/useKeygenAudio';
 
 export default function HostView() {
@@ -42,6 +43,8 @@ export default function HostView() {
   const [votes, setVotes] = useState({});
   const [chatHistory, setChatHistory] = useState([]);
   const [isTyping, setIsTyping] = useState({});
+
+  const isLowPerformance = usePerformanceMode();
 
   const { playCategoryHover, playCategorySelect, initAudio } = useRetroAudio();
   const { toggleBgm, nextTrack, prevTrack, isBgmPlaying, isReady } = useKeygenAudio();
@@ -208,8 +211,8 @@ export default function HostView() {
 
   return (
     <div className="view-host relative min-h-[100dvh] w-full text-white font-sans flex flex-col">
-      <AnimatedGridPattern className="text-white/5 opacity-50 z-0" maxOpacity={0.3} />
-      <MovingPixels />
+      <AnimatedGridPattern className="text-white/5 opacity-50 z-0" maxOpacity={0.3} isLowPerformance={isLowPerformance} />
+      <MovingPixels isLowPerformance={isLowPerformance} />
       
       {/* Top Bar for Language & Credits */}
       <div className="absolute top-4 start-4 z-50 flex items-center gap-4">

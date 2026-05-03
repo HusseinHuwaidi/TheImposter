@@ -10,12 +10,14 @@ import { AnimatedGridPattern } from '../components/ui/AnimatedGridPattern';
 import { TextReveal } from '../components/ui/TextReveal';
 import { MagneticButton } from '../components/ui/MagneticButton';
 import { MovingPixels } from '../components/ui/MovingPixels';
+import { usePerformanceMode } from '../hooks/usePerformanceMode';
 
 const EMOJIS = ['😎', '🤠', '👽', '👻', '🤖', '💩', '🦄', '🦖'];
 const AVATARS = ['boy', 'girl', 'bear', 'cat']; // We can map these to images later
 
 export default function ClientView() {
   const { i18n, t } = useTranslation();
+  const isLowPerformance = usePerformanceMode();
   const [pin, setPin] = useState(new URLSearchParams(window.location.search).get('pin') || '');
   const [name, setName] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState(null);
@@ -141,8 +143,8 @@ export default function ClientView() {
 
   return (
     <div className="view-client relative min-h-[100dvh] w-full flex flex-col">
-      <AnimatedGridPattern className="text-pink-500/10 z-0" maxOpacity={0.2} />
-      <MovingPixels />
+      <AnimatedGridPattern className="text-pink-500/10 z-0" maxOpacity={0.2} isLowPerformance={isLowPerformance} />
+      <MovingPixels isLowPerformance={isLowPerformance} />
       
       <div className="absolute top-4 start-4 z-50">
         <LanguageSelector />

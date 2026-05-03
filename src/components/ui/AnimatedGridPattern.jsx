@@ -12,6 +12,7 @@ export function AnimatedGridPattern({
   className,
   maxOpacity = 0.5,
   duration = 4,
+  isLowPerformance = false,
   ...props
 }) {
   const id = useId();
@@ -53,28 +54,31 @@ export function AnimatedGridPattern({
         </pattern>
       </defs>
       <rect width="100%" height="100%" strokeWidth={0} fill={`url(#${id})`} />
-      <svg x={x} y={y} className="overflow-visible">
-        {squares.map(({ pos: [x, y], id }, index) => (
-          <motion.rect
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, maxOpacity, 0] }}
-            transition={{
-              duration,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: index * 0.1,
-              repeatDelay: Math.random() * 2,
-            }}
-            strokeWidth="0"
-            key={`${x}-${y}-${id}`}
-            width={width - 1}
-            height={height - 1}
-            x={x * width + 1}
-            y={y * height + 1}
-            fill="currentColor"
-          />
-        ))}
-      </svg>
+      
+      {!isLowPerformance && (
+        <svg x={x} y={y} className="overflow-visible">
+          {squares.map(({ pos: [x, y], id }, index) => (
+            <motion.rect
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, maxOpacity, 0] }}
+              transition={{
+                duration,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: index * 0.1,
+                repeatDelay: Math.random() * 2,
+              }}
+              strokeWidth="0"
+              key={`${x}-${y}-${id}`}
+              width={width - 1}
+              height={height - 1}
+              x={x * width + 1}
+              y={y * height + 1}
+              fill="currentColor"
+            />
+          ))}
+        </svg>
+      )}
     </svg>
   );
 }

@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export function MovingPixels() {
+export function MovingPixels({ isLowPerformance = false }) {
+  if (isLowPerformance) return null;
+
   // Generate a random array of tiny retro pixels
   const pixels = Array.from({ length: 40 }).map((_, i) => ({
     id: i,
