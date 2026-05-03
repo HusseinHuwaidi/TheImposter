@@ -43,8 +43,7 @@ function App() {
 
   return (
     <Router>
-      <div className="app-container relative overflow-hidden">
-        <MovingPixels />
+      <div className="app-container relative">
         <Routes>
           <Route path="/" element={<Navigate to="/play" replace />} />
           <Route path="/host" element={<HostView />} />

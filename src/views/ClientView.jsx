@@ -9,6 +9,7 @@ import { ShinyButton } from '../components/ui/ShinyButton';
 import { AnimatedGridPattern } from '../components/ui/AnimatedGridPattern';
 import { TextReveal } from '../components/ui/TextReveal';
 import { MagneticButton } from '../components/ui/MagneticButton';
+import { MovingPixels } from '../components/ui/MovingPixels';
 
 const EMOJIS = ['😎', '🤠', '👽', '👻', '🤖', '💩', '🦄', '🦖'];
 const AVATARS = ['boy', 'girl', 'bear', 'cat']; // We can map these to images later
@@ -139,8 +140,9 @@ export default function ClientView() {
   const isImposterAware = isImposter && !gameConfig?.hardMode;
 
   return (
-    <div className="view-client relative overflow-y-auto overflow-x-hidden min-h-[100dvh] w-full flex flex-col">
+    <div className="view-client relative min-h-[100dvh] w-full flex flex-col">
       <AnimatedGridPattern className="text-pink-500/10 z-0" maxOpacity={0.2} />
+      <MovingPixels />
       
       <div className="absolute top-4 start-4 z-50">
         <LanguageSelector />

@@ -24,7 +24,6 @@ body {
   font-family: var(--font-family);
   background-color: var(--bg-dark);
   color: var(--text-main);
-  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -43,7 +42,7 @@ body {
 
 .app-container {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -126,7 +125,6 @@ body {
   display: flex;
   background: radial-gradient(circle at top left, #2a2a40, #13131a);
   position: relative;
-  overflow: hidden;
 }
 
 .view-host::before {

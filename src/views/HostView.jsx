@@ -14,6 +14,7 @@ import { ShinyButton } from '../components/ui/ShinyButton';
 import { AnimatedGridPattern } from '../components/ui/AnimatedGridPattern';
 import { TextReveal } from '../components/ui/TextReveal';
 import { MagneticButton } from '../components/ui/MagneticButton';
+import { MovingPixels } from '../components/ui/MovingPixels';
 import { useRetroAudio } from '../hooks/useRetroAudio';
 import { useKeygenAudio } from '../hooks/useKeygenAudio';
 
@@ -206,8 +207,9 @@ export default function HostView() {
   const lang = i18n.language?.split('-')[0] || 'en';
 
   return (
-    <div className="view-host relative min-h-[100dvh] w-full overflow-y-auto overflow-x-hidden text-white font-sans flex flex-col">
+    <div className="view-host relative min-h-[100dvh] w-full text-white font-sans flex flex-col">
       <AnimatedGridPattern className="text-white/5 opacity-50 z-0" maxOpacity={0.3} />
+      <MovingPixels />
       
       {/* Top Bar for Language & Credits */}
       <div className="absolute top-4 start-4 z-50 flex items-center gap-4">
@@ -304,7 +306,7 @@ export default function HostView() {
               <div className="font-bold mb-6 text-lg md:text-xl shrink-0 text-center text-cyan-400 uppercase tracking-widest">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
               
               {/* Category Grid - Uniform grid to fill space without void and prevent scrolling */}
-              <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 place-items-center gap-2 md:gap-4 mb-4 flex-1 min-h-[150px] w-full items-center justify-center">
+              <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 place-items-center gap-2 md:gap-4 mb-8 pb-4 flex-1 min-h-[150px] w-full items-center justify-center">
                 {[
                   { id: 'random', icon: '🎲' },
                   { id: 'food', icon: '🍔' },
