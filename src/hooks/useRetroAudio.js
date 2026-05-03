@@ -47,7 +47,7 @@ export function useRetroAudio() {
     setTimeout(() => playBlip(659.25, 'square', 0.2, 0.08), 200); // E5
   }, [playBlip]);
 
-  // Coded background music! A simple 16-bit arpeggio loop
+  // Coded background music! A mysterious, ominous 16-bit arpeggio loop for "The Imposter"
   const toggleBgm = useCallback(() => {
     initAudio();
     
@@ -59,16 +59,16 @@ export function useRetroAudio() {
 
     setIsBgmPlaying(true);
     
-    // Fun retro 16-bit arpeggiator sequence (A minor / C major feel)
+    // Ominous Phrygian Dominant / Harmonic Minor sequence
     const sequence = [
-      220.00, // A3
-      329.63, // E4
-      261.63, // C4
-      392.00, // G4
-      220.00, // A3
-      329.63, // E4
-      293.66, // D4
-      349.23, // F4
+      130.81, // C3
+      138.59, // Db3
+      164.81, // E3
+      174.61, // F3
+      130.81, // C3
+      110.00, // A2
+      123.47, // B2
+      138.59, // Db3
     ];
     let step = 0;
 
@@ -78,24 +78,33 @@ export function useRetroAudio() {
 
       const freq = sequence[step % sequence.length];
       
-      const osc = ctx.createOscillator();
+      // We use two oscillators to create a slightly detuned, eerie "thick" synth sound
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
       const gainNode = ctx.createGain();
       
-      // Alternate between square and triangle for that SEGA Genesis FM synth feel
-      osc.type = step % 2 === 0 ? 'square' : 'triangle';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      osc1.type = 'triangle';
+      osc2.type = 'square';
       
-      gainNode.gain.setValueAtTime(0.03, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      // Slight detune for that eerie analog chorus effect
+      osc1.frequency.setValueAtTime(freq, ctx.currentTime);
+      osc2.frequency.setValueAtTime(freq * 1.01, ctx.currentTime);
       
-      osc.connect(gainNode);
+      // Very soft, ominous volume
+      gainNode.gain.setValueAtTime(0.04, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      
+      osc1.connect(gainNode);
+      osc2.connect(gainNode);
       gainNode.connect(ctx.destination);
       
-      osc.start();
-      osc.stop(ctx.currentTime + 0.15);
+      osc1.start();
+      osc2.start();
+      osc1.stop(ctx.currentTime + 0.3);
+      osc2.stop(ctx.currentTime + 0.3);
       
       step++;
-    }, 180); // Speed of the arpeggiator
+    }, 250); // Slower, more ominous pacing
   }, [isBgmPlaying]);
 
   useEffect(() => {
