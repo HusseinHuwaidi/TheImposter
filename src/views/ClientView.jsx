@@ -24,6 +24,14 @@ export default function ClientView() {
   const [myId, setMyId] = useState('');
   const [gameConfig, setGameConfig] = useState(null);
   const [players, setPlayers] = useState([]);
+  const [turnState, setTurnState] = useState(null);
+  
+  // Chat States
+  const [chatHistory, setChatHistory] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isTypingMap, setIsTypingMap] = useState({});
+  const [selectedTargetId, setSelectedTargetId] = useState('');
+  let typingTimeout = null;
 
   useEffect(() => {
     return () => {
@@ -44,18 +52,30 @@ export default function ClientView() {
       const channel = supabase.channel(`room:${pin}`);
 
       channel.on('broadcast', { event: 'state_change' }, (payload) => {
-        const { gameState, gameConfig, players } = payload.payload;
+        const { gameState, gameConfig, players, turnState } = payload.payload;
         if (gameConfig) setGameConfig(gameConfig);
         if (players) setPlayers(players);
+        if (turnState) setTurnState(turnState);
         
         if (gameState === 'role_reveal') setPhase('role_reveal');
         if (gameState === 'questioning') setPhase('questioning');
+        if (gameState === 'open_floor') setPhase('open_floor');
         if (gameState === 'voting') setPhase('voting');
         if (gameState === 'leaderboard') setPhase('waiting');
         if (gameState === 'lobby') {
           setPhase('waiting');
           setGameConfig(null);
+          setChatHistory([]); // Reset chat
         }
+      });
+
+      channel.on('broadcast', { event: 'chat_message' }, (payload) => {
+        setChatHistory(prev => [...prev, payload.payload]);
+      });
+
+      channel.on('broadcast', { event: 'typing' }, (payload) => {
+        const { userId, typing } = payload.payload;
+        setIsTypingMap(prev => ({ ...prev, [userId]: typing }));
       });
 
       channel.on('presence', { event: 'sync' }, () => {
@@ -74,6 +94,33 @@ export default function ClientView() {
 
       setRoomChannel(channel);
     }
+  };
+
+  const handleTyping = (e) => {
+    setChatInput(e.target.value);
+    if (!roomChannel) return;
+    
+    roomChannel.send({ type: 'broadcast', event: 'typing', payload: { userId: myId, typing: true } });
+    
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      roomChannel.send({ type: 'broadcast', event: 'typing', payload: { userId: myId, typing: false } });
+    }, 2000);
+  };
+
+  const sendChatMessage = (e, targetId = null) => {
+    e.preventDefault();
+    if (!chatInput.trim() || !roomChannel) return;
+    
+    const msgPayload = {
+      fromId: myId,
+      toId: targetId,
+      text: chatInput.trim()
+    };
+    
+    roomChannel.send({ type: 'broadcast', event: 'chat_message', payload: msgPayload });
+    roomChannel.send({ type: 'broadcast', event: 'typing', payload: { userId: myId, typing: false } });
+    setChatInput('');
   };
 
   const lang = i18n.language?.split('-')[0] || 'en';
@@ -223,14 +270,128 @@ export default function ClientView() {
           </motion.div>
         )}
 
-        {phase === 'questioning' && (
+        {phase === 'questioning' && turnState && (
           <motion.div
             key="questioning"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
+            className="flex-1 flex flex-col p-4 z-10 min-h-0"
           >
-            <h2 style={{ fontSize: '2.5rem', color: 'var(--primary)' }}>{t('look_at_tv')}</h2>
+            <div className="text-center mb-6 shrink-0">
+              <h2 className="text-2xl font-bold text-white mb-2">{t('look_at_tv')}</h2>
+              {players[turnState.askerIndex]?.id === myId && (
+                <p className="text-pink-400 font-bold animate-pulse">It's your turn to ask!</p>
+              )}
+              {players[turnState.answererIndex]?.id === myId && (
+                <p className="text-cyan-400 font-bold animate-pulse">Get ready to answer!</p>
+              )}
+            </div>
+
+            {/* Optional Remote Chat Area */}
+            <div className="bg-black/40 border border-white/10 rounded-2xl p-4 flex-1 flex flex-col min-h-[200px] overflow-hidden">
+              <div className="text-xs text-white/40 uppercase tracking-widest font-bold mb-3 border-b border-white/5 pb-2 shrink-0">Remote Chat (Optional)</div>
+              
+              <div className="flex-1 overflow-y-auto flex flex-col gap-2 custom-scrollbar pb-2">
+                {chatHistory.length === 0 ? (
+                  <div className="m-auto text-white/30 italic text-sm text-center px-4">Playing in person? Just talk out loud!<br/>Playing remotely? Use the chat below.</div>
+                ) : (
+                  chatHistory.map((msg, i) => {
+                    const isMe = msg.fromId === myId;
+                    const sender = players.find(p => p.id === msg.fromId);
+                    return (
+                      <div key={i} className={`p-2 rounded-xl text-sm max-w-[85%] border border-white/10 ${isMe ? 'bg-pink-500/20 text-white self-end rounded-br-none' : 'bg-white/5 text-white/90 self-start rounded-bl-none'}`}>
+                        {!isMe && <div className="text-[10px] text-white/50 mb-0.5">{sender?.name} {sender?.emoji}</div>}
+                        {msg.text}
+                      </div>
+                    );
+                  })
+                )}
+                {Object.entries(isTypingMap).filter(([id, typing]) => typing && id !== myId).map(([id]) => (
+                  <div key={id} className="text-[10px] text-white/50 italic animate-pulse">Someone is typing...</div>
+                ))}
+              </div>
+
+              {/* Chat Input Container */}
+              <div className="shrink-0 mt-3 pt-3 border-t border-white/5">
+                {(players[turnState.askerIndex]?.id === myId || players[turnState.answererIndex]?.id === myId) ? (
+                  <form onSubmit={(e) => sendChatMessage(e, players[turnState.askerIndex]?.id === myId ? players[turnState.answererIndex]?.id : players[turnState.askerIndex]?.id)} className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={chatInput}
+                      onChange={handleTyping}
+                      placeholder={players[turnState.askerIndex]?.id === myId ? "Type a question..." : "Type your answer..."}
+                      className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500"
+                    />
+                    <button type="submit" disabled={!chatInput.trim()} className="bg-pink-500 text-white px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-50">
+                      Send
+                    </button>
+                  </form>
+                ) : (
+                  <div className="text-center text-white/30 text-xs italic">Spectating current turn...</div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {phase === 'open_floor' && (
+          <motion.div
+            key="open_floor"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 flex flex-col p-4 z-10 min-h-0"
+          >
+            <div className="text-center mb-6 shrink-0">
+              <h2 className="text-2xl font-bold text-pink-400 tracking-widest mb-1">OPEN FLOOR</h2>
+              <p className="text-white/70 text-sm">Ask anyone a final question!</p>
+            </div>
+
+            <div className="bg-black/40 border border-white/10 rounded-2xl p-4 flex-1 flex flex-col min-h-[200px] overflow-hidden">
+              <div className="text-xs text-white/40 uppercase tracking-widest font-bold mb-3 border-b border-white/5 pb-2 shrink-0">Remote Chat (Optional)</div>
+              
+              <div className="flex-1 overflow-y-auto flex flex-col gap-2 custom-scrollbar pb-2">
+                {chatHistory.map((msg, i) => {
+                  const isMe = msg.fromId === myId;
+                  const sender = players.find(p => p.id === msg.fromId);
+                  return (
+                    <div key={i} className={`p-2 rounded-xl text-sm max-w-[85%] border border-white/10 ${isMe ? 'bg-pink-500/20 text-white self-end rounded-br-none' : 'bg-white/5 text-white/90 self-start rounded-bl-none'}`}>
+                      {!isMe && <div className="text-[10px] text-white/50 mb-0.5">{sender?.name} {sender?.emoji}</div>}
+                      {msg.text}
+                    </div>
+                  );
+                })}
+                {Object.entries(isTypingMap).filter(([id, typing]) => typing && id !== myId).map(([id]) => (
+                  <div key={id} className="text-[10px] text-white/50 italic animate-pulse">Someone is typing...</div>
+                ))}
+              </div>
+
+              <div className="shrink-0 mt-3 pt-3 border-t border-white/5">
+                <form onSubmit={(e) => sendChatMessage(e, selectedTargetId)} className="flex flex-col gap-2">
+                  <select 
+                    value={selectedTargetId} 
+                    onChange={(e) => setSelectedTargetId(e.target.value)}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+                  >
+                    <option value="" className="text-black">Broadcast to everyone...</option>
+                    {players.filter(p => p.id !== myId).map(p => (
+                      <option key={p.id} value={p.id} className="text-black">{p.name} {p.emoji}</option>
+                    ))}
+                  </select>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={chatInput}
+                      onChange={handleTyping}
+                      placeholder="Type a message..."
+                      className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500"
+                    />
+                    <button type="submit" disabled={!chatInput.trim()} className="bg-pink-500 text-white px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-50">
+                      Send
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </motion.div>
         )}
 

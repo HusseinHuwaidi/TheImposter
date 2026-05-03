@@ -39,6 +39,9 @@ export default function HostView() {
   const [gameConfig, setGameConfig] = useState({ category: '', subject: null, decoySubject: null, imposterId: null, hardMode: false });
   const [turnState, setTurnState] = useState({ askerIndex: 0, answererIndex: 1 });
   const [votes, setVotes] = useState({});
+  const [chatHistory, setChatHistory] = useState([]);
+  const [isTyping, setIsTyping] = useState({});
+
   const { playCategoryHover, playCategorySelect, initAudio } = useRetroAudio();
   const { toggleBgm, nextTrack, prevTrack, isBgmPlaying, isReady } = useKeygenAudio();
 
@@ -80,6 +83,13 @@ export default function HostView() {
         const { voterId, votedForId } = payload.payload;
         setVotes(prev => ({ ...prev, [voterId]: votedForId }));
       })
+      .on('broadcast', { event: 'chat_message' }, (payload) => {
+        setChatHistory(prev => [...prev, payload.payload]);
+      })
+      .on('broadcast', { event: 'typing' }, (payload) => {
+        const { userId, typing } = payload.payload;
+        setIsTyping(prev => ({ ...prev, [userId]: typing }));
+      })
       .subscribe();
 
     setRoomChannel(channel);
@@ -88,6 +98,25 @@ export default function HostView() {
       supabase.removeChannel(channel);
     };
   }, [i18n.language]);
+
+  // Handle Disconnections during active game
+  useEffect(() => {
+    if (gameState === 'lobby' || gameState === 'leaderboard') return;
+    
+    // Check if Imposter left
+    if (gameConfig.imposterId && !players.find(p => p.id === gameConfig.imposterId)) {
+      alert("The Imposter has fled the game!");
+      broadcastStateChange('leaderboard');
+      return;
+    }
+
+    // Check minimum players
+    if (players.length < 3) {
+      alert("Not enough players left to continue!");
+      broadcastStateChange('lobby');
+      return;
+    }
+  }, [players, gameState, gameConfig]);
 
   const broadcastStateChange = async (newState, extraPayload = {}) => {
     setGameState(newState);
@@ -163,8 +192,8 @@ export default function HostView() {
     let nextAnswerer = (nextAsker + 1) % players.length;
 
     if (nextAsker >= players.length) {
-      // Everyone has asked a question, move to voting
-      broadcastStateChange('voting');
+      // Everyone has asked a question, move to open floor
+      broadcastStateChange('open_floor');
     } else {
       setTurnState({ askerIndex: nextAsker, answererIndex: nextAnswerer });
       broadcastStateChange('questioning', { turnState: { askerIndex: nextAsker, answererIndex: nextAnswerer } });
@@ -403,32 +432,120 @@ export default function HostView() {
       )}
 
       {gameState === 'questioning' && (
-        <div className="absolute inset-0 flex items-center justify-center p-8">
-          <motion.div
-            key={`turn-${turnState.askerIndex}`}
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -100, opacity: 0 }}
-            className="glass-panel w-full max-w-4xl text-center"
-          >
-            <h1 style={{ fontSize: '3rem', color: 'var(--text)' }}>
-              <span style={{ color: 'var(--primary)', fontSize: '4rem' }}>{players[turnState.askerIndex]?.name} {players[turnState.askerIndex]?.emoji}</span>
-              <br />
-              {t('ask_a_question')} {t('to')}
-              <br />
-              <span style={{ color: 'var(--secondary)', fontSize: '4rem' }}>{players[turnState.answererIndex]?.name} {players[turnState.answererIndex]?.emoji}</span>
-            </h1>
+        <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8">
+          <div className="flex flex-col w-full h-full max-w-6xl gap-4">
             
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="btn btn-primary"
-              style={{ marginTop: '60px' }}
-              onClick={nextTurn}
+            {/* Main Prompt */}
+            <motion.div
+              key={`turn-${turnState.askerIndex}`}
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="glass-panel text-center p-6 shrink-0"
             >
-              Next Turn
-            </motion.button>
-          </motion.div>
+              <h1 className="text-2xl md:text-4xl text-white">
+                <span className="text-primary font-bold">{players[turnState.askerIndex]?.name} {players[turnState.askerIndex]?.emoji}</span>
+                <br className="md:hidden" />
+                <span className="mx-2 opacity-70">{t('ask_a_question')} {t('to')}</span>
+                <br className="md:hidden" />
+                <span className="text-secondary font-bold">{players[turnState.answererIndex]?.name} {players[turnState.answererIndex]?.emoji}</span>
+              </h1>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="btn btn-primary mt-4 md:mt-6 px-8 py-3 text-lg md:text-xl"
+                onClick={nextTurn}
+              >
+                Next Turn
+              </motion.button>
+            </motion.div>
+
+            {/* Optional Chat Box for Remote Play */}
+            <div className="glass-panel flex-1 flex flex-col p-4 md:p-6 overflow-hidden min-h-0">
+              <h3 className="text-white/50 text-sm font-bold uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Remote Chat (Optional)</h3>
+              
+              <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-3 pb-4">
+                {chatHistory.length === 0 && (
+                  <div className="m-auto text-white/30 italic text-center">No messages yet. Talk out loud if playing in person!</div>
+                )}
+                {chatHistory.map((msg, i) => {
+                  const sender = players.find(p => p.id === msg.fromId);
+                  return (
+                    <div key={i} className="bg-white/5 rounded-xl p-3 max-w-[80%] self-start border border-white/10">
+                      <div className="text-xs text-white/50 mb-1 font-bold">{sender?.name} {sender?.emoji}</div>
+                      <div className="text-white md:text-lg">{msg.text}</div>
+                    </div>
+                  );
+                })}
+                {/* Typing Indicators */}
+                {Object.entries(isTyping).filter(([_, typing]) => typing).map(([userId]) => {
+                  const typist = players.find(p => p.id === userId);
+                  if (!typist) return null;
+                  return (
+                    <div key={`typing-${userId}`} className="text-white/50 italic text-sm animate-pulse">
+                      {typist.name} {typist.emoji} is typing...
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {gameState === 'open_floor' && (
+        <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8">
+          <div className="flex flex-col w-full h-full max-w-6xl gap-4">
+            
+            <motion.div
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="glass-panel text-center p-6 shrink-0 border-pink-500/30 border-2"
+            >
+              <h1 className="text-3xl md:text-5xl text-pink-400 font-black tracking-wider mb-2">OPEN FLOOR</h1>
+              <p className="text-white/70 text-lg md:text-xl">Anyone can ask a final question to anyone!</p>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="btn btn-accent mt-4 md:mt-6 px-8 py-3 text-lg md:text-xl"
+                onClick={() => broadcastStateChange('voting')}
+              >
+                Start Voting
+              </motion.button>
+            </motion.div>
+
+            {/* Optional Chat Box for Remote Play */}
+            <div className="glass-panel flex-1 flex flex-col p-4 md:p-6 overflow-hidden min-h-0">
+              <h3 className="text-white/50 text-sm font-bold uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Remote Chat (Optional)</h3>
+              
+              <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-3 pb-4">
+                {chatHistory.length === 0 && (
+                  <div className="m-auto text-white/30 italic text-center">No messages yet. Talk out loud if playing in person!</div>
+                )}
+                {chatHistory.map((msg, i) => {
+                  const sender = players.find(p => p.id === msg.fromId);
+                  return (
+                    <div key={i} className="bg-white/5 rounded-xl p-3 max-w-[80%] self-start border border-white/10">
+                      <div className="text-xs text-white/50 mb-1 font-bold">{sender?.name} {sender?.emoji}</div>
+                      <div className="text-white md:text-lg">{msg.text}</div>
+                    </div>
+                  );
+                })}
+                {/* Typing Indicators */}
+                {Object.entries(isTyping).filter(([_, typing]) => typing).map(([userId]) => {
+                  const typist = players.find(p => p.id === userId);
+                  if (!typist) return null;
+                  return (
+                    <div key={`typing-${userId}`} className="text-white/50 italic text-sm animate-pulse">
+                      {typist.name} {typist.emoji} is typing...
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
         </div>
       )}
 
