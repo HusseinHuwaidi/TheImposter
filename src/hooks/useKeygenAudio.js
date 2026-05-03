@@ -1,60 +1,45 @@
 import { useRef, useCallback, useEffect, useState } from 'react';
 
 const PLAYLIST = [
-  '/music/unreal_superhero_3.xm',
-  '/music/class05.mod',
-  '/music/beyond_the_network.xm'
+  '/music/unreal_superhero.mp3',
+  '/music/spineless.mp3'
 ];
 
 export function useKeygenAudio() {
   const [isBgmPlaying, setIsBgmPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const [isReady, setIsReady] = useState(false);
-  const playerRef = useRef(null);
-  const bufferCacheRef = useRef({});
+  const audioRef = useRef(null);
 
+  // Initialize the native HTML5 Audio element on mount
   useEffect(() => {
-    // Initialize ChiptuneJsPlayer once it's available in window
-    if (window.ChiptuneJsPlayer && window.ChiptuneJsConfig && !playerRef.current) {
-      const config = new window.ChiptuneJsConfig(-1);
-      playerRef.current = new window.ChiptuneJsPlayer(config);
-      
-      // Setup loop
-      playerRef.current.onEnded(() => {
-        // Since we want repeat mode, libopenmpt usually loops internally if told to,
-        // but if it triggers onEnded, we can just jump to next track or restart.
-        // Let's just go to next track.
-        nextTrack();
-      });
+    const audio = new Audio(PLAYLIST[0]);
+    audio.loop = true;
+    audioRef.current = audio;
 
-      setIsReady(true);
-    }
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
   }, []);
 
   const playTrack = useCallback((index) => {
-    if (!playerRef.current) return;
-    const url = PLAYLIST[index];
+    if (!audioRef.current) return;
     
-    // Stop current
-    playerRef.current.stop();
-
-    if (bufferCacheRef.current[url]) {
-      playerRef.current.play(bufferCacheRef.current[url]);
+    // Update src and play
+    audioRef.current.src = PLAYLIST[index];
+    audioRef.current.play().then(() => {
       setIsBgmPlaying(true);
-    } else {
-      playerRef.current.load(url, (buffer) => {
-        bufferCacheRef.current[url] = buffer;
-        playerRef.current.play(buffer);
-        setIsBgmPlaying(true);
-      });
-    }
+    }).catch(err => {
+      console.warn("Audio playback prevented:", err);
+      setIsBgmPlaying(false);
+    });
   }, []);
 
   const toggleBgm = useCallback(() => {
-    if (!playerRef.current) return;
+    if (!audioRef.current) return;
     
     if (isBgmPlaying) {
-      playerRef.current.stop();
+      audioRef.current.pause();
       setIsBgmPlaying(false);
     } else {
       playTrack(currentTrackIndex);
@@ -62,31 +47,25 @@ export function useKeygenAudio() {
   }, [isBgmPlaying, currentTrackIndex, playTrack]);
 
   const nextTrack = useCallback(() => {
-    if (!playerRef.current) return;
     const nextIndex = (currentTrackIndex + 1) % PLAYLIST.length;
     setCurrentTrackIndex(nextIndex);
     if (isBgmPlaying) {
       playTrack(nextIndex);
+    } else {
+      audioRef.current.src = PLAYLIST[nextIndex];
     }
   }, [currentTrackIndex, isBgmPlaying, playTrack]);
 
   const prevTrack = useCallback(() => {
-    if (!playerRef.current) return;
     const prevIndex = (currentTrackIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
     setCurrentTrackIndex(prevIndex);
     if (isBgmPlaying) {
       playTrack(prevIndex);
+    } else {
+      audioRef.current.src = PLAYLIST[prevIndex];
     }
   }, [currentTrackIndex, isBgmPlaying, playTrack]);
 
-  // Clean up on unmount
-  useEffect(() => {
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.stop();
-      }
-    };
-  }, []);
-
-  return { toggleBgm, nextTrack, prevTrack, isBgmPlaying, isReady };
+  // isReady is always true since HTML5 Audio is built-in
+  return { toggleBgm, nextTrack, prevTrack, isBgmPlaying, isReady: true };
 }
