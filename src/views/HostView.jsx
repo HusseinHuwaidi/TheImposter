@@ -308,78 +308,81 @@ export default function HostView() {
       )}
 
       {gameState === 'role_reveal' && (
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="glass-panel"
-          style={{ margin: 'auto', textAlign: 'center', maxWidth: '800px', width: '100%', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-        >
-          <h1 style={{ fontSize: '4rem', color: 'var(--primary)' }}>{t('look_at_devices')}</h1>
-          <p style={{ fontSize: '2rem', marginTop: '20px', color: 'var(--text-muted)' }}>{t('category')}: {CATEGORY_NAMES[gameConfig.category]?.[lang] || gameConfig.category}</p>
-          
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn btn-accent"
-            style={{ marginTop: '60px' }}
-            onClick={nextTurn}
+        <div className="absolute inset-0 flex items-center justify-center p-8">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-panel w-full max-w-4xl text-center"
           >
-            Start Questioning
-          </motion.button>
-        </motion.div>
+            <h1 style={{ fontSize: '4rem', color: 'var(--primary)' }}>{t('look_at_devices')}</h1>
+            <p style={{ fontSize: '2rem', marginTop: '20px', color: 'var(--text-muted)' }}>{t('category')}: {CATEGORY_NAMES[gameConfig.category]?.[lang] || gameConfig.category}</p>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="btn btn-accent"
+              style={{ marginTop: '60px' }}
+              onClick={nextTurn}
+            >
+              Start Questioning
+            </motion.button>
+          </motion.div>
+        </div>
       )}
 
       {gameState === 'questioning' && (
-        <motion.div
-          key={`turn-${turnState.askerIndex}`}
-          initial={{ x: 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -100, opacity: 0 }}
-          className="glass-panel"
-          style={{ margin: 'auto', textAlign: 'center', maxWidth: '800px', width: '100%', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-        >
-          <h1 style={{ fontSize: '3rem', color: 'var(--text)' }}>
-            <span style={{ color: 'var(--primary)', fontSize: '4rem' }}>{players[turnState.askerIndex]?.name} {players[turnState.askerIndex]?.emoji}</span>
-            <br />
-            {t('ask_a_question')} {t('to')}
-            <br />
-            <span style={{ color: 'var(--secondary)', fontSize: '4rem' }}>{players[turnState.answererIndex]?.name} {players[turnState.answererIndex]?.emoji}</span>
-          </h1>
-          
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn btn-primary"
-            style={{ marginTop: '60px' }}
-            onClick={nextTurn}
+        <div className="absolute inset-0 flex items-center justify-center p-8">
+          <motion.div
+            key={`turn-${turnState.askerIndex}`}
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -100, opacity: 0 }}
+            className="glass-panel w-full max-w-4xl text-center"
           >
-            Next Turn
-          </motion.button>
-        </motion.div>
+            <h1 style={{ fontSize: '3rem', color: 'var(--text)' }}>
+              <span style={{ color: 'var(--primary)', fontSize: '4rem' }}>{players[turnState.askerIndex]?.name} {players[turnState.askerIndex]?.emoji}</span>
+              <br />
+              {t('ask_a_question')} {t('to')}
+              <br />
+              <span style={{ color: 'var(--secondary)', fontSize: '4rem' }}>{players[turnState.answererIndex]?.name} {players[turnState.answererIndex]?.emoji}</span>
+            </h1>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="btn btn-primary"
+              style={{ marginTop: '60px' }}
+              onClick={nextTurn}
+            >
+              Next Turn
+            </motion.button>
+          </motion.div>
+        </div>
       )}
 
       {gameState === 'voting' && (
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="glass-panel"
-          style={{ margin: 'auto', textAlign: 'center', maxWidth: '800px', width: '100%', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-        >
-          <h1 style={{ fontSize: '4rem', color: 'var(--primary)' }}>{t('who_is_imposter')}</h1>
-          <p style={{ fontSize: '2rem', marginTop: '20px', color: 'var(--text-muted)' }}>{t('vote_on_devices')}</p>
-          
-          <h3 style={{ marginTop: '40px' }}>Votes Cast: {Object.keys(votes).length} / {players.length}</h3>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn btn-accent"
-            style={{ marginTop: '60px' }}
-            onClick={() => broadcastStateChange('leaderboard')}
+        <div className="absolute inset-0 flex items-center justify-center p-8">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-panel w-full max-w-4xl text-center"
           >
-            Reveal Imposter
-          </motion.button>
-        </motion.div>
+            <h1 style={{ fontSize: '4rem', color: 'var(--primary)' }}>{t('who_is_imposter')}</h1>
+            <p style={{ fontSize: '2rem', marginTop: '20px', color: 'var(--text-muted)' }}>{t('vote_on_devices')}</p>
+            
+            <h3 style={{ marginTop: '40px' }}>Votes Cast: {Object.keys(votes).length} / {players.length}</h3>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="btn btn-accent"
+              style={{ marginTop: '60px' }}
+              onClick={() => broadcastStateChange('leaderboard')}
+            >
+              Reveal Imposter
+            </motion.button>
+          </motion.div>
+        </div>
       )}
 
       {/* Leaderboard State + Interstitial Ad */}
@@ -389,7 +392,7 @@ export default function HostView() {
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="glass-panel"
-            style={{ flex: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+            style={{ flex: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
           >
             <h1 style={{ fontSize: '3.5rem', color: 'var(--accent)', marginBottom: '40px' }}>{t('leaderboard')}</h1>
             
