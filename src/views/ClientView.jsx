@@ -92,7 +92,7 @@ export default function ClientView() {
   const isImposterAware = isImposter && !gameConfig?.hardMode;
 
   return (
-    <div className="view-client relative overflow-hidden h-full w-full">
+    <div className="view-client relative overflow-y-auto overflow-x-hidden min-h-[100dvh] w-full flex flex-col">
       <AnimatedGridPattern className="text-pink-500/10 z-0" maxOpacity={0.2} />
       
       <div className="absolute top-4 start-4 z-50">
@@ -283,7 +283,7 @@ export default function ClientView() {
       </AnimatePresence>
 
       {/* Persistent Ad Banner at the bottom */}
-      <div className="ad-banner relative flex items-center justify-center overflow-hidden" style={{ width: '100%', height: '60px' }}>
+      <div className="ad-banner relative flex items-center justify-center overflow-hidden mt-auto shrink-0" style={{ width: '100%', height: '60px' }}>
         <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
           <span className="text-xs tracking-widest uppercase font-bold text-white/50">Sponsored Space</span>
         </div>

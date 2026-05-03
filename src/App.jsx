@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useTranslation } from 'react-i18next';
 import HostView from './views/HostView';
 import ClientView from './views/ClientView';
+import { MovingPixels } from './components/ui/MovingPixels';
 import './App.css';
 
 function App() {
@@ -42,7 +43,8 @@ function App() {
 
   return (
     <Router>
-      <div className="app-container">
+      <div className="app-container relative overflow-hidden">
+        <MovingPixels />
         <Routes>
           <Route path="/" element={<Navigate to="/play" replace />} />
           <Route path="/host" element={<HostView />} />

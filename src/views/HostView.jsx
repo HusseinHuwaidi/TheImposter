@@ -177,7 +177,7 @@ export default function HostView() {
   const lang = i18n.language?.split('-')[0] || 'en';
 
   return (
-    <div className="view-host relative h-full w-full overflow-hidden text-white font-sans">
+    <div className="view-host relative min-h-[100dvh] w-full overflow-y-auto overflow-x-hidden text-white font-sans flex flex-col">
       <AnimatedGridPattern className="text-white/5 opacity-50 z-0" maxOpacity={0.3} />
       
       {/* Top Bar for Language & Credits */}
@@ -195,7 +195,7 @@ export default function HostView() {
       {showCredits && <CreditsModal onClose={() => setShowCredits(false)} />}
 
       {gameState === 'lobby' && (
-        <div className="w-full h-[100vh] p-4 md:p-8 box-border flex flex-col gap-4 md:gap-6 relative z-10">
+        <div className="w-full min-h-[100dvh] p-4 md:p-8 box-border flex flex-col gap-4 md:gap-6 relative z-10 pb-16">
           
           {/* Top Row */}
           <div className="flex flex-col landscape:flex-row md:flex-row gap-4 md:gap-6 flex-1 min-h-0">
@@ -214,7 +214,7 @@ export default function HostView() {
               </div>
               
               <h2 className="text-lg md:text-xl">{t('game_pin')}</h2>
-              <div className="text-4xl md:text-5xl font-black tracking-widest text-white drop-shadow-md">
+              <div className="text-3xl md:text-4xl font-black tracking-widest text-white drop-shadow-md">
                 <TextReveal text={pin} className="justify-center" />
               </div>
               
@@ -297,7 +297,7 @@ export default function HostView() {
                       playCategorySelect();
                       setSelectedCategory(cat.id);
                     }}
-                    className={`text-5xl md:text-6xl xl:text-7xl transition-all duration-300 hover:scale-110 ${selectedCategory === cat.id ? 'scale-125 drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100 z-10 brightness-110' : 'opacity-40 hover:opacity-80 grayscale-[50%]'}`}
+                    className={`text-4xl md:text-5xl xl:text-6xl transition-all duration-300 hover:scale-110 ${selectedCategory === cat.id ? 'scale-125 drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100 z-10 brightness-110' : 'opacity-40 hover:opacity-80 grayscale-[50%]'}`}
                   >
                     {cat.icon}
                   </button>
