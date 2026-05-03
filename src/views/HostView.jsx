@@ -200,13 +200,13 @@ export default function HostView() {
         <div className="w-full h-[100vh] p-4 md:p-8 box-border flex flex-col gap-4 md:gap-6 relative z-10">
           
           {/* Top Row */}
-          <div className="flex flex-col md:flex-row gap-4 md:gap-6 flex-1 min-h-0">
+          <div className="flex flex-col landscape:flex-row md:flex-row gap-4 md:gap-6 flex-1 min-h-0">
             
-            {/* Tile 1: Join Game (Left) */}
+            {/* Tile 1: Join Game (Left - 25%) */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="glass-panel w-full md:w-[320px] flex flex-col items-center justify-center text-center p-4 md:p-6 shrink-0"
+              className="glass-panel w-full landscape:w-1/4 md:w-1/4 flex flex-col items-center justify-center text-center p-4 md:p-6 shrink-0"
             >
               <h1 className="text-2xl md:text-3xl font-black text-accent mb-2">{t('join_the_game')}</h1>
               {motto && <p className="text-pink-400 italic font-medium text-xs md:text-sm mb-4">"{motto}"</p>}
@@ -228,12 +228,12 @@ export default function HostView() {
               </ShinyButton>
             </motion.div>
 
-            {/* Tile 2: Game Setup (Center) */}
+            {/* Tile 2: Game Setup (Center - 50%) */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="glass-panel flex-1 flex flex-col p-4 md:p-6 relative min-w-0"
+              className="glass-panel w-full landscape:w-1/2 md:w-1/2 flex flex-col p-4 md:p-6 relative min-w-0"
             >
               <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 shrink-0">
                 <h2 className="text-2xl md:text-3xl font-bold">{t('SETUP_TITLE') || 'Game Setup'}</h2>
@@ -260,8 +260,8 @@ export default function HostView() {
 
               <div className="font-bold mb-6 text-lg md:text-xl shrink-0 text-center text-cyan-400 uppercase tracking-widest">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
               
-              {/* Category Grid - Massive clickble emojis */}
-              <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mb-8 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-[150px]">
+              {/* Category Grid - Uniform grid to fill space without void */}
+              <div className="grid grid-cols-3 lg:grid-cols-4 place-items-center gap-4 md:gap-6 mb-8 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-[150px]">
                 {[
                   { id: 'random', icon: '🎲' },
                   { id: 'food', icon: '🍔' },
@@ -310,12 +310,12 @@ export default function HostView() {
             </ShinyButton>
           </motion.div>
 
-            {/* Tile 3: Ad Banner (Right) */}
+            {/* Tile 3: Ad Banner (Right - 25%) */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="glass-panel w-full md:w-[320px] flex flex-col items-center justify-center p-0 overflow-hidden relative shrink-0"
+              className="glass-panel w-full landscape:w-1/4 md:w-1/4 flex flex-col items-center justify-center p-0 overflow-hidden relative shrink-0"
             >
               <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30 pointer-events-none">
                 <span className="text-5xl mb-3 drop-shadow-md">⭐</span>
@@ -331,12 +331,12 @@ export default function HostView() {
             
           </div>
 
-          {/* Bottom Row: Players List */}
+          {/* Bottom Row: Players List (Flexible Height) */}
           <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="glass-panel h-[200px] md:h-[250px] shrink-0 flex flex-col p-4 md:p-6 overflow-hidden"
+            className="glass-panel h-1/4 min-h-[150px] shrink-0 flex flex-col p-4 md:p-6 overflow-hidden"
           >
             <h2 className="text-xl md:text-2xl font-bold mb-4 border-b border-white/10 pb-2 shrink-0">
               {t('PLAYERS_LABEL')?.replace('{count}', players.length.toString()) || `Players (${players.length})`}
