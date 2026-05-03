@@ -182,18 +182,14 @@ export default function HostView() {
       
       {/* Top Bar for Language & Credits */}
       <div className="absolute top-4 start-4 z-50 flex items-center gap-4">
-        <MagneticButton>
-          <LanguageSelector />
-        </MagneticButton>
-        <MagneticButton>
-          <button 
-            onClick={() => setShowCredits(true)}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm border border-white/20 text-xl"
-            title="Credits"
-          >
-            🏆
-          </button>
-        </MagneticButton>
+        <LanguageSelector />
+        <button 
+          onClick={() => setShowCredits(true)}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm border border-white/20 text-xl"
+          title="Credits"
+        >
+          🏆
+        </button>
       </div>
 
       {showCredits && <CreditsModal onClose={() => setShowCredits(false)} />}

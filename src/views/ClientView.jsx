@@ -96,9 +96,7 @@ export default function ClientView() {
       <AnimatedGridPattern className="text-pink-500/10 z-0" maxOpacity={0.2} />
       
       <div className="absolute top-4 start-4 z-50">
-        <MagneticButton>
-          <LanguageSelector />
-        </MagneticButton>
+        <LanguageSelector />
       </div>
 
       <AnimatePresence mode="wait">
