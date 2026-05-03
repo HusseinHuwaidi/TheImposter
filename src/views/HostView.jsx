@@ -271,44 +271,6 @@ export default function HostView() {
               transition={{ delay: 0.1 }}
               className="glass-panel w-full landscape:w-1/2 md:w-1/2 flex flex-col p-4 md:p-6 relative min-w-0"
             >
-              <div className="flex justify-end items-center mb-6 border-b border-white/10 pb-4 shrink-0">
-                
-                <div className="flex items-center gap-3">
-                  <div className="flex bg-white/5 rounded-xl border border-white/10 overflow-hidden">
-                    <button 
-                      onClick={prevTrack} 
-                      className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 hover:bg-white/10 transition-all text-sm md:text-lg"
-                      title="Previous Track"
-                    >
-                      ⏮️
-                    </button>
-                    <button 
-                      onClick={toggleBgm} 
-                      className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 transition-all text-xl md:text-2xl ${isBgmPlaying ? 'bg-cyan-500/20 text-cyan-400' : 'hover:bg-white/10'}`}
-                      title="Toggle Keygen Music"
-                    >
-                      {isBgmPlaying ? '🎵' : '🔇'}
-                    </button>
-                    <button 
-                      onClick={nextTrack} 
-                      className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 hover:bg-white/10 transition-all text-sm md:text-lg"
-                      title="Next Track"
-                    >
-                      ⏭️
-                    </button>
-                  </div>
-
-                  <label className="flex items-center gap-3 cursor-pointer group bg-white/5 px-4 py-2 rounded-xl hover:bg-white/10 transition-colors h-10 md:h-12">
-                    <div className="font-bold text-sm md:text-lg text-pink-400">{t('HARD_MODE') || 'Hard Mode'}</div>
-                    <div className="relative ml-2">
-                      <input type="checkbox" className="sr-only" checked={hardMode} onChange={(e) => setHardMode(e.target.checked)} />
-                      <div className={`block w-12 h-7 rounded-full transition-colors ${hardMode ? 'bg-pink-500' : 'bg-slate-700'}`}></div>
-                      <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${hardMode ? 'translate-x-5' : ''}`}></div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
               <div className="font-bold mb-6 text-lg md:text-xl shrink-0 text-center text-cyan-400 uppercase tracking-widest">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
               
               {/* Category Grid - Uniform grid to fill space without void and prevent scrolling */}
@@ -354,11 +316,48 @@ export default function HostView() {
               )}
 
             <ShinyButton
-              className="w-full py-3 md:py-4 text-lg md:text-xl"
+              className="w-full py-3 text-sm mb-4"
               onClick={startGame}
             >
               {t('START_GAME') || t('start_game')}
             </ShinyButton>
+
+            <div className="flex justify-center items-center mt-auto border-t border-white/10 pt-4 shrink-0 w-full">
+              <div className="flex items-center gap-3">
+                <div className="flex bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+                  <button 
+                    onClick={prevTrack} 
+                    className="flex items-center justify-center w-10 h-10 hover:bg-white/10 transition-all text-sm"
+                    title="Previous Track"
+                  >
+                    ⏮️
+                  </button>
+                  <button 
+                    onClick={toggleBgm} 
+                    className={`flex items-center justify-center w-10 h-10 transition-all text-xl ${isBgmPlaying ? 'bg-cyan-500/20 text-cyan-400' : 'hover:bg-white/10'}`}
+                    title="Toggle Keygen Music"
+                  >
+                    {isBgmPlaying ? '🎵' : '🔇'}
+                  </button>
+                  <button 
+                    onClick={nextTrack} 
+                    className="flex items-center justify-center w-10 h-10 hover:bg-white/10 transition-all text-sm"
+                    title="Next Track"
+                  >
+                    ⏭️
+                  </button>
+                </div>
+
+                <label className="flex items-center gap-3 cursor-pointer group bg-white/5 px-4 py-2 rounded-xl hover:bg-white/10 transition-colors h-10">
+                  <div className="font-bold text-sm text-pink-400">{t('HARD_MODE') || 'Hard Mode'}</div>
+                  <div className="relative ml-2">
+                    <input type="checkbox" className="sr-only" checked={hardMode} onChange={(e) => setHardMode(e.target.checked)} />
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${hardMode ? 'bg-pink-500' : 'bg-slate-700'}`}></div>
+                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${hardMode ? 'translate-x-4' : ''}`}></div>
+                  </div>
+                </label>
+              </div>
+            </div>
           </motion.div>
 
             {/* Tile 3: Ad Banner (Right - 25%) */}
