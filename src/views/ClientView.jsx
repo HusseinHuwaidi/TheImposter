@@ -4,12 +4,13 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import AdBanner from '../components/AdBanner';
 import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 
 const EMOJIS = ['😎', '🤠', '👽', '👻', '🤖', '💩', '🦄', '🦖'];
 const AVATARS = ['boy', 'girl', 'bear', 'cat']; // We can map these to images later
 
 export default function ClientView() {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [pin, setPin] = useState(new URLSearchParams(window.location.search).get('pin') || '');
   const [name, setName] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState(null);
@@ -71,8 +72,27 @@ export default function ClientView() {
     }
   };
 
+  const lang = i18n.language?.split('-')[0] || 'en';
+
+  const getSubjectDisplay = (subjectObj) => {
+    if (!subjectObj) return '';
+    if (subjectObj.isCustom) return `${subjectObj.emoji} ${subjectObj.names.custom}`;
+    return `${subjectObj.emoji} ${subjectObj.names[lang] || subjectObj.names['en']}`;
+  };
+
+  const isImposter = gameConfig?.imposterId === myId;
+  const showDecoy = isImposter && gameConfig?.hardMode;
+  
+  // What to show on the reveal screen
+  const subjectToDisplay = showDecoy ? gameConfig?.decoySubject : gameConfig?.subject;
+  const isImposterAware = isImposter && !gameConfig?.hardMode;
+
   return (
-    <div className="view-client">
+    <div className="view-client relative">
+      <div className="absolute top-4 left-4 z-50">
+        <LanguageSelector />
+      </div>
+
       <AnimatePresence mode="wait">
         {/* Join Phase */}
         {phase === 'join' && (
@@ -83,11 +103,11 @@ export default function ClientView() {
             exit={{ opacity: 0, y: -50 }}
             style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           >
-            <h1 style={{ fontSize: '3rem', textAlign: 'center', marginBottom: '40px', color: 'var(--primary)' }}>Play Now!</h1>
+            <h1 style={{ fontSize: '3rem', textAlign: 'center', marginBottom: '40px', color: 'var(--primary)' }}>{t('play_now') || 'Play Now!'}</h1>
             <input
               type="number"
               className="input-premium"
-              placeholder="Game PIN"
+              placeholder={t('game_pin') || 'Game PIN'}
               value={pin}
               onChange={(e) => setPin(e.target.value)}
               style={{ marginBottom: '20px' }}
@@ -98,7 +118,7 @@ export default function ClientView() {
               className="btn btn-primary"
               onClick={handleJoin}
             >
-              Enter
+              {t('enter') || 'Enter'}
             </motion.button>
             <div style={{ marginTop: '30px', textAlign: 'center' }}>
               <Link to="/host" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '1rem', transition: 'opacity 0.2s' }}>
@@ -117,11 +137,11 @@ export default function ClientView() {
             exit={{ opacity: 0, x: -100 }}
             style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           >
-            <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Who are you?</h2>
+            <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>{t('who_are_you') || 'Who are you?'}</h2>
             <input
               type="text"
               className="input-premium"
-              placeholder="Nickname"
+              placeholder={t('nickname') || 'Nickname'}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -148,7 +168,7 @@ export default function ClientView() {
               disabled={!name || !selectedEmoji}
               style={{ opacity: (!name || !selectedEmoji) ? 0.5 : 1 }}
             >
-              I'm Ready!
+              {t('im_ready') || "I'm Ready!"}
             </motion.button>
           </motion.div>
         )}
@@ -168,7 +188,7 @@ export default function ClientView() {
             >
               {selectedEmoji}
             </motion.div>
-            <h2 style={{ fontSize: '2.5rem', color: 'var(--success)', textAlign: 'center' }}>{t('youre_in')}</h2>
+            <h2 style={{ fontSize: '2.5rem', color: 'var(--success)', textAlign: 'center' }}>{t('youre_in') || "You're in!"}</h2>
             <p style={{ marginTop: '10px', color: 'var(--text-muted)' }}>{t('look_at_tv')}</p>
           </motion.div>
         )}
@@ -178,17 +198,18 @@ export default function ClientView() {
             key="role_reveal"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '20px' }}
           >
-            {gameConfig?.imposterId === myId ? (
+            {isImposterAware ? (
               <>
-                <h1 style={{ fontSize: '3rem', color: '#FF4B4B', marginBottom: '20px' }}>{t('you_are_imposter')}</h1>
-                <p style={{ fontSize: '1.5rem', color: 'var(--text-muted)' }}>{t('shhh')}</p>
+                <h1 style={{ fontSize: '2.5rem', color: '#FF4B4B', marginBottom: '20px', whiteSpace: 'pre-line' }}>{t('YOU_ARE_IMPOSTER') || t('you_are_imposter')}</h1>
+                <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>{t('IMPOSTER_DESCRIPTION') || t('shhh')}</p>
               </>
             ) : (
               <>
-                <h2 style={{ fontSize: '2rem', color: 'var(--text-muted)' }}>{t('secret_word')}</h2>
-                <h1 style={{ fontSize: '4rem', color: 'var(--success)', marginTop: '20px' }}>{gameConfig?.word}</h1>
+                <h2 style={{ fontSize: '1.5rem', color: 'var(--text-muted)' }}>{t('YOU_KNOW_SUBJECT') || t('secret_word')}</h2>
+                <h1 style={{ fontSize: '3rem', color: 'var(--success)', marginTop: '20px', marginBottom: '20px' }}>{getSubjectDisplay(subjectToDisplay)}</h1>
+                <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>{t('REMEMBER_SUBJECT') || 'Remember it! Don\'t say it out loud.'}</p>
               </>
             )}
           </motion.div>
@@ -212,9 +233,9 @@ export default function ClientView() {
             animate={{ opacity: 1, y: 0 }}
             style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
           >
-            <h2 style={{ textAlign: 'center', marginBottom: '20px', fontSize: '2rem', color: 'var(--accent)' }}>{t('select_imposter')}</h2>
+            <h2 style={{ textAlign: 'center', marginBottom: '20px', fontSize: '2rem', color: 'var(--accent)' }}>{t('select_imposter') || 'Select the Imposter!'}</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', flex: 1, overflowY: 'auto', paddingBottom: '20px' }}>
-              {players.filter(p => p.id !== myId).map((p, i) => (
+              {players.filter(p => p.id !== myId || gameConfig?.hardMode).map((p, i) => (
                 <motion.button
                   key={p.id}
                   whileHover={{ scale: 1.05 }}
