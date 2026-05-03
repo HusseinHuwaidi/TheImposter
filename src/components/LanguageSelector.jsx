@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const LANGUAGES = [
-  { code: 'en', flag: '🇺🇸', name: 'English' },
-  { code: 'ar', flag: '🇸🇦', name: 'العربية' },
-  { code: 'ja', flag: '🇯🇵', name: '日本語' },
-  { code: 'zh', flag: '🇨🇳', name: '中文' },
-  { code: 'ko', flag: '🇰🇷', name: '한국어' },
-  { code: 'de', flag: '🇩🇪', name: 'Deutsch' },
-  { code: 'fr', flag: '🇫🇷', name: 'Français' },
-  { code: 'pt', flag: '🇧🇷', name: 'Português' },
-  { code: 'es', flag: '🇪🇸', name: 'Español' }
+  { code: 'en', flag: '🇺🇸', name: 'English', rtl: false },
+  { code: 'ar', flag: '🇸🇦', name: 'العربية', rtl: true },
+  { code: 'ja', flag: '🇯🇵', name: '日本語', rtl: false },
+  { code: 'zh', flag: '🇨🇳', name: '中文', rtl: false },
+  { code: 'ko', flag: '🇰🇷', name: '한국어', rtl: false },
+  { code: 'de', flag: '🇩🇪', name: 'Deutsch', rtl: false },
+  { code: 'fr', flag: '🇫🇷', name: 'Français', rtl: false },
+  { code: 'pt', flag: '🇧🇷', name: 'Português', rtl: false },
+  { code: 'es', flag: '🇪🇸', name: 'Español', rtl: false }
 ];
 
 export default function LanguageSelector() {
@@ -25,31 +26,58 @@ export default function LanguageSelector() {
   };
 
   return (
-    <div className="relative z-50">
+    <>
       <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm border border-white/20 text-xl"
+        onClick={() => setIsOpen(true)}
+        className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 transition-all backdrop-blur-sm border border-white/20 text-2xl hover:scale-110 shadow-lg shadow-black/20 relative z-40"
         title={t('LANGUAGE_SELECT')}
       >
         {currentLang.flag}
       </button>
 
-      {isOpen && (
-        <div className="absolute top-12 left-0 mt-2 w-40 rounded-xl bg-slate-800 border border-white/20 shadow-2xl overflow-hidden animate-fade-in">
-          <div className="flex flex-col">
-            {LANGUAGES.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => changeLanguage(lang.code)}
-                className={`flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors text-left ${lang.code === currentLang.code ? 'bg-white/10 text-cyan-400 font-bold' : 'text-white'}`}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-2xl bg-slate-800/90 rounded-3xl border border-white/20 p-8 shadow-2xl relative overflow-hidden"
+            >
+              {/* Background Accents */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+              
+              <h2 className="text-3xl font-black text-white text-center mb-8 tracking-wide drop-shadow-md relative z-10">{t('LANGUAGE_SELECT') || 'Select Language'}</h2>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => changeLanguage(lang.code)}
+                    className={`flex flex-col items-center justify-center gap-3 p-6 rounded-2xl transition-all ${lang.code === currentLang.code ? 'bg-cyan-500 text-slate-900 scale-105 shadow-lg shadow-cyan-500/30' : 'bg-white/5 hover:bg-white/15 text-white hover:scale-105'}`}
+                  >
+                    <span className="text-4xl drop-shadow-sm">{lang.flag}</span>
+                    <span className="text-lg font-bold">{lang.name}</span>
+                  </button>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="mt-8 w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xl transition-all active:scale-95 relative z-10"
               >
-                <span className="text-2xl">{lang.flag}</span>
-                <span className="text-sm">{lang.name}</span>
+                {t('BACK') || 'Close'}
               </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

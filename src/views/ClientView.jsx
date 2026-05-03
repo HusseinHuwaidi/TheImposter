@@ -89,7 +89,7 @@ export default function ClientView() {
 
   return (
     <div className="view-client relative">
-      <div className="absolute top-4 left-4 z-50">
+      <div className="absolute top-4 start-4 z-50">
         <LanguageSelector />
       </div>
 
@@ -275,11 +275,16 @@ export default function ClientView() {
       </AnimatePresence>
 
       {/* Persistent Ad Banner at the bottom */}
-      <div className="ad-banner" style={{ overflow: 'hidden' }}>
-        <AdBanner
-          slotId="2412367923"
-          style={{ width: '100%', height: '60px' }}
-        />
+      <div className="ad-banner relative flex items-center justify-center overflow-hidden" style={{ width: '100%', height: '60px' }}>
+        <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
+          <span className="text-xs tracking-widest uppercase font-bold text-white/50">Sponsored Space</span>
+        </div>
+        <div className="relative z-10 w-full h-full">
+          <AdBanner
+            slotId="2412367923"
+            style={{ width: '100%', height: '60px' }}
+          />
+        </div>
       </div>
     </div>
   );

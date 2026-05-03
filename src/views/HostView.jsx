@@ -161,7 +161,7 @@ export default function HostView() {
   return (
     <div className="view-host relative h-full w-full overflow-hidden text-white font-sans">
       {/* Top Bar for Language & Credits */}
-      <div className="absolute top-4 left-4 z-50 flex items-center gap-4">
+      <div className="absolute top-4 start-4 z-50 flex items-center gap-4">
         <LanguageSelector />
         <button 
           onClick={() => setShowCredits(true)}
@@ -188,8 +188,16 @@ export default function HostView() {
               {motto && <p className="text-pink-400 italic font-medium mt-1 mb-3 text-sm md:text-base">"{motto}"</p>}
               
               <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '30px' }}>
-                <div style={{ background: 'white', padding: '10px', borderRadius: '16px', flexShrink: 0 }}>
-                  <QRCodeSVG value={joinUrl} size={140} style={{ width: 'min(140px, 15vh)', height: 'min(140px, 15vh)' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ background: 'white', padding: '10px', borderRadius: '16px', flexShrink: 0 }}>
+                    <QRCodeSVG value={joinUrl} size={140} style={{ width: 'min(140px, 15vh)', height: 'min(140px, 15vh)' }} />
+                  </div>
+                  <button 
+                    onClick={() => window.open(joinUrl, '_blank')}
+                    className="w-full bg-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 border border-cyan-500 text-cyan-400 font-bold py-2 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] text-sm"
+                  >
+                    Join as Player
+                  </button>
                 </div>
                 <div style={{ textAlign: 'left' }}>
                   <h2 style={{ fontSize: 'min(1.5rem, 2vh)', margin: 0 }}>{t('go_to')} <span style={{ color: 'var(--primary)' }}>{window.location.host}</span></h2>
@@ -414,11 +422,17 @@ export default function HostView() {
           </motion.div>
 
           {/* Interstitial Ad Space */}
-          <div style={{ width: '300px', background: 'rgba(0,0,0,0.3)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', overflow: 'hidden' }}>
-            <AdBanner
-              slotId="7632905010"
-              style={{ width: '300px', height: '600px' }}
-            />
+          <div className="glass-panel relative flex flex-col items-center justify-center overflow-hidden" style={{ width: '300px', padding: 0 }}>
+            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30 pointer-events-none">
+              <span className="text-4xl mb-2">⭐</span>
+              <span className="text-xs tracking-widest uppercase font-bold text-white/50">Sponsored Space</span>
+            </div>
+            <div className="relative z-10 w-full h-full">
+              <AdBanner
+                slotId="7632905010"
+                style={{ width: '300px', height: '600px' }}
+              />
+            </div>
           </div>
         </div>
       )}
