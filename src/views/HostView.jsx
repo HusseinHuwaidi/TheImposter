@@ -110,7 +110,7 @@ export default function HostView() {
   return (
     <div className="view-host">
       {gameState === 'lobby' && (
-        <div style={{ display: 'flex', width: '100%', padding: '40px' }}>
+        <div style={{ display: 'flex', width: '100%', height: '100%', padding: '2vw', boxSizing: 'border-box' }}>
 
           {/* Left Side: QR Code & Pin */}
           <motion.div
@@ -119,20 +119,20 @@ export default function HostView() {
             transition={{ type: 'spring', bounce: 0.4 }}
             style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
           >
-            <div className="glass-panel" style={{ textAlign: 'center' }}>
-              <h1 style={{ fontSize: '3rem', marginBottom: '20px', color: 'var(--accent)' }}>Join the Game!</h1>
-              <div style={{ background: 'white', padding: '20px', borderRadius: '24px', display: 'inline-block' }}>
-                <QRCodeSVG value={joinUrl} size={256} />
+            <div className="glass-panel" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <h1 style={{ fontSize: 'min(3rem, 4vh)', marginBottom: 'min(20px, 2vh)', color: 'var(--accent)' }}>{t('join_the_game')}</h1>
+              <div style={{ background: 'white', padding: '15px', borderRadius: '24px', display: 'inline-block' }}>
+                <QRCodeSVG value={joinUrl} size={180} style={{ width: 'min(256px, 25vh)', height: 'min(256px, 25vh)' }} />
               </div>
-              <h2 style={{ fontSize: '2rem', marginTop: '30px' }}>Go to <span style={{ color: 'var(--primary)' }}>{window.location.host}</span></h2>
-              <h2 style={{ fontSize: '2rem' }}>Game PIN: <span style={{ fontSize: '4rem', fontWeight: '900', letterSpacing: '4px' }}>{pin}</span></h2>
+              <h2 style={{ fontSize: 'min(2rem, 3vh)', marginTop: 'min(30px, 3vh)' }}>{t('go_to')} <span style={{ color: 'var(--primary)' }}>{window.location.host}</span></h2>
+              <h2 style={{ fontSize: 'min(2rem, 3vh)' }}>{t('game_pin')}: <span style={{ fontSize: 'min(4rem, 6vh)', fontWeight: '900', letterSpacing: '4px' }}>{pin}</span></h2>
             </div>
 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="btn btn-primary"
-              style={{ marginTop: '40px', fontSize: '1.5rem', padding: '20px 60px' }}
+              style={{ marginTop: 'min(40px, 4vh)', fontSize: 'min(1.5rem, 3vh)', padding: '15px 40px' }}
               onClick={startGame}
             >
               {t('start_game')}
