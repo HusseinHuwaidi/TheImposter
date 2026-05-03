@@ -14,6 +14,7 @@ import { ShinyButton } from '../components/ui/ShinyButton';
 import { AnimatedGridPattern } from '../components/ui/AnimatedGridPattern';
 import { TextReveal } from '../components/ui/TextReveal';
 import { MagneticButton } from '../components/ui/MagneticButton';
+import { useRetroAudio } from '../hooks/useRetroAudio';
 
 export default function HostView() {
   const { i18n, t } = useTranslation();
@@ -37,6 +38,17 @@ export default function HostView() {
   const [gameConfig, setGameConfig] = useState({ category: '', subject: null, decoySubject: null, imposterId: null, hardMode: false });
   const [turnState, setTurnState] = useState({ askerIndex: 0, answererIndex: 1 });
   const [votes, setVotes] = useState({});
+  const { playCategoryHover, playCategorySelect, toggleBgm, isBgmPlaying, initAudio } = useRetroAudio();
+
+  // Start audio context on first interaction
+  useEffect(() => {
+    const handleInteraction = () => {
+      initAudio();
+      document.removeEventListener('click', handleInteraction);
+    };
+    document.addEventListener('click', handleInteraction);
+    return () => document.removeEventListener('click', handleInteraction);
+  }, [initAudio]);
 
   useEffect(() => {
     // Pick random motto based on current language
@@ -226,14 +238,24 @@ export default function HostView() {
               <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 shrink-0">
                 <h2 className="text-2xl md:text-3xl font-bold">{t('SETUP_TITLE') || 'Game Setup'}</h2>
                 
-                <label className="flex items-center gap-3 cursor-pointer group bg-white/5 px-4 py-2 rounded-xl hover:bg-white/10 transition-colors">
-                  <div className="font-bold text-sm md:text-lg text-pink-400">{t('HARD_MODE') || 'Hard Mode'}</div>
-                  <div className="relative ml-2">
-                    <input type="checkbox" className="sr-only" checked={hardMode} onChange={(e) => setHardMode(e.target.checked)} />
-                    <div className={`block w-12 h-7 rounded-full transition-colors ${hardMode ? 'bg-pink-500' : 'bg-slate-700'}`}></div>
-                    <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${hardMode ? 'translate-x-5' : ''}`}></div>
-                  </div>
-                </label>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={toggleBgm} 
+                    className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl transition-all text-xl md:text-2xl ${isBgmPlaying ? 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.5)] scale-105' : 'bg-white/5 hover:bg-white/10'}`}
+                    title="Toggle SEGA Background Music"
+                  >
+                    {isBgmPlaying ? '🎵' : '🔇'}
+                  </button>
+
+                  <label className="flex items-center gap-3 cursor-pointer group bg-white/5 px-4 py-2 rounded-xl hover:bg-white/10 transition-colors h-10 md:h-12">
+                    <div className="font-bold text-sm md:text-lg text-pink-400">{t('HARD_MODE') || 'Hard Mode'}</div>
+                    <div className="relative ml-2">
+                      <input type="checkbox" className="sr-only" checked={hardMode} onChange={(e) => setHardMode(e.target.checked)} />
+                      <div className={`block w-12 h-7 rounded-full transition-colors ${hardMode ? 'bg-pink-500' : 'bg-slate-700'}`}></div>
+                      <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${hardMode ? 'translate-x-5' : ''}`}></div>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               <div className="font-bold mb-6 text-lg md:text-xl shrink-0 text-center text-cyan-400 uppercase tracking-widest">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
@@ -256,7 +278,11 @@ export default function HostView() {
                   <button
                     key={cat.id}
                     title={CATEGORY_NAMES[cat.id]?.[lang] || cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
+                    onMouseEnter={playCategoryHover}
+                    onClick={() => {
+                      playCategorySelect();
+                      setSelectedCategory(cat.id);
+                    }}
                     className={`text-6xl md:text-8xl transition-all duration-300 hover:scale-110 ${selectedCategory === cat.id ? 'scale-125 drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100 z-10 brightness-110' : 'opacity-40 hover:opacity-80 grayscale-[50%]'}`}
                   >
                     {cat.icon}
