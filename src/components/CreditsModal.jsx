@@ -1,11 +1,12 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 export default function CreditsModal({ onClose }) {
   const { t } = useTranslation();
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" dir="ltr">
       <div className="w-full max-w-md bg-slate-800 rounded-3xl border border-white/20 p-6 shadow-2xl relative overflow-hidden">
         
         {/* Background Accents */}
@@ -32,6 +33,7 @@ export default function CreditsModal({ onClose }) {
           {t('BACK')}
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
