@@ -14,22 +14,11 @@ export default function CreditsModal({ onClose }) {
         
         <h2 className="text-3xl font-black text-white text-center mb-6 tracking-wide drop-shadow-md">CREDITS</h2>
 
-        <div className="space-y-6 text-center z-10 relative">
-          <div>
-            <h3 className="text-cyan-400 font-bold text-sm uppercase tracking-widest mb-1">Created By</h3>
-            <p className="text-white text-xl font-medium">Hussein Huwaidi</p>
-          </div>
-          
-          <div>
-            <h3 className="text-cyan-400 font-bold text-sm uppercase tracking-widest mb-1">Testing & QA</h3>
-            <p className="text-white text-xl font-medium">Ali Huwaidi</p>
-          </div>
-          
-          <div>
-            <h3 className="text-cyan-400 font-bold text-sm uppercase tracking-widest mb-1">Translations</h3>
-            <p className="text-white text-xl font-medium">Ameer Huwaidi</p>
-            <p className="text-white text-xl font-medium">Sakeenah Al-Saihati</p>
-          </div>
+        <div className="space-y-4 text-center z-10 relative">
+          <p className="text-white text-2xl font-bold">Hussein Huwaidi</p>
+          <p className="text-white text-2xl font-bold">Ali Huwaidi</p>
+          <p className="text-white text-2xl font-bold">Ameer Huwaidi</p>
+          <p className="text-white text-2xl font-bold">Sakeenah Al-Saihati</p>
         </div>
 
         <button 
