@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import AdBanner from '../components/AdBanner';
 
@@ -83,6 +84,11 @@ export default function ClientView() {
             >
               Enter
             </motion.button>
+            <div style={{ marginTop: '30px', textAlign: 'center' }}>
+              <Link to="/host" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '1rem', transition: 'opacity 0.2s' }}>
+                Want to host a game? <span style={{ color: 'var(--secondary)', fontWeight: 'bold' }}>Click here</span>
+              </Link>
+            </div>
           </motion.div>
         )}
 
