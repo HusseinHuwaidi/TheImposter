@@ -175,141 +175,150 @@ export default function HostView() {
       {showCredits && <CreditsModal onClose={() => setShowCredits(false)} />}
 
       {gameState === 'lobby' && (
-        <div className="w-full h-full p-8 box-border flex gap-8">
-          {/* Left Side: Setup & Settings */}
+        <div className="w-full h-[100vh] p-4 md:p-8 box-border grid grid-cols-1 md:grid-cols-12 grid-rows-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)] md:grid-rows-[minmax(0,2fr)_minmax(0,1fr)] gap-4 md:gap-6">
+          
+          {/* Tile 1: Join Game (Left) */}
           <motion.div
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ type: 'spring', bounce: 0.4 }}
-            className="flex-1 flex flex-col gap-6"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-panel md:col-span-3 flex flex-col items-center justify-center text-center p-4 md:p-6"
           >
-            <div className="glass-panel text-center flex-none p-6">
-              <h1 style={{ fontSize: 'min(2.5rem, 4vh)', margin: 0, color: 'var(--accent)' }}>{t('join_the_game')}</h1>
-              {motto && <p className="text-pink-400 italic font-medium mt-1 mb-3 text-sm md:text-base">"{motto}"</p>}
-              
-              <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '30px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ background: 'white', padding: '10px', borderRadius: '16px', flexShrink: 0 }}>
-                    <QRCodeSVG value={joinUrl} size={140} style={{ width: 'min(140px, 15vh)', height: 'min(140px, 15vh)' }} />
-                  </div>
-                  <button 
-                    onClick={() => window.open(joinUrl, '_blank')}
-                    className="w-full bg-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 border border-cyan-500 text-cyan-400 font-bold py-2 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] text-sm"
-                  >
-                    Join as Player
-                  </button>
-                </div>
-                <div style={{ textAlign: 'left' }}>
-                  <h2 style={{ fontSize: 'min(1.5rem, 2vh)', margin: 0 }}>{t('go_to')} <span style={{ color: 'var(--primary)' }}>{window.location.host}</span></h2>
-                  <h2 style={{ fontSize: 'min(1.5rem, 2vh)', margin: '10px 0 0 0' }}>{t('game_pin')}</h2>
-                  <div style={{ fontSize: 'min(3rem, 5vh)', fontWeight: '900', letterSpacing: '4px', lineHeight: 1 }}>{pin}</div>
-                </div>
-              </div>
+            <h1 className="text-2xl md:text-3xl font-black text-accent mb-2">{t('join_the_game')}</h1>
+            {motto && <p className="text-pink-400 italic font-medium text-xs md:text-sm mb-4">"{motto}"</p>}
+            
+            <div className="bg-white p-3 md:p-4 rounded-2xl mb-4 shadow-lg shrink-0">
+              <QRCodeSVG value={joinUrl} size={160} className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40" />
             </div>
+            
+            <h2 className="text-lg md:text-xl">{t('game_pin')}</h2>
+            <div className="text-4xl md:text-5xl font-black tracking-widest text-white drop-shadow-md">{pin}</div>
+            
+            <button 
+              onClick={() => window.open(joinUrl, '_blank')}
+              className="mt-4 w-full bg-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 border border-cyan-500 text-cyan-400 font-bold py-2 rounded-xl transition-all text-sm"
+            >
+              {t('Join as Player') || 'Join as Player'}
+            </button>
+          </motion.div>
 
-            {/* Game Settings */}
-            <div className="glass-panel flex-1 flex flex-col overflow-y-auto p-6">
-              <h2 className="text-xl font-bold mb-4 border-b border-white/10 pb-2">{t('SETUP_TITLE') || 'Game Setup'}</h2>
+          {/* Tile 2: Game Setup (Center) */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="glass-panel md:col-span-6 flex flex-col p-4 md:p-6 relative"
+          >
+            <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-2 shrink-0">
+              <h2 className="text-xl md:text-2xl font-bold">{t('SETUP_TITLE') || 'Game Setup'}</h2>
               
-              {/* Hard Mode Toggle */}
-              <label className="flex items-center gap-3 cursor-pointer group mb-6 bg-white/5 p-3 rounded-xl hover:bg-white/10 transition-colors">
-                <div className="relative">
+              <label className="flex items-center gap-2 cursor-pointer group bg-white/5 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors">
+                <div className="font-bold text-sm md:text-base text-pink-400">{t('HARD_MODE') || 'Hard Mode'}</div>
+                <div className="relative ml-2">
                   <input type="checkbox" className="sr-only" checked={hardMode} onChange={(e) => setHardMode(e.target.checked)} />
-                  <div className={`block w-14 h-8 rounded-full transition-colors ${hardMode ? 'bg-pink-500' : 'bg-slate-700'}`}></div>
-                  <div className={`absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${hardMode ? 'translate-x-6' : ''}`}></div>
-                </div>
-                <div>
-                  <div className="font-bold text-lg">{t('HARD_MODE') || 'Hard Mode'}</div>
-                  <div className="text-xs text-slate-300">{t('HARD_MODE_HINT') || 'Imposter sees a fake subject — nobody knows who they are!'}</div>
+                  <div className={`block w-10 h-6 rounded-full transition-colors ${hardMode ? 'bg-pink-500' : 'bg-slate-700'}`}></div>
+                  <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${hardMode ? 'translate-x-4' : ''}`}></div>
                 </div>
               </label>
+            </div>
 
-              {/* Category Selector */}
-              <div className="font-bold mb-2">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
-              <div className="flex flex-wrap gap-3 mb-4">
-                {[
-                  { id: 'random', icon: '🎲' },
-                  { id: 'food', icon: '🍔' },
-                  { id: 'animals', icon: '🐾' },
-                  { id: 'countries', icon: '🌍' },
-                  { id: 'sports', icon: '⚽' },
-                  { id: 'vehicles', icon: '🚗' },
-                  { id: 'clothing', icon: '👕' },
-                  { id: 'nature', icon: '🌲' },
-                  { id: 'movies', icon: '🎬' },
-                  { id: 'music', icon: '🎵' },
-                  { id: 'custom', icon: '✏️' }
-                ].map((cat) => (
-                  <button
-                    key={cat.id}
-                    title={CATEGORY_NAMES[cat.id]?.[lang] || cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`w-14 h-14 rounded-2xl text-3xl flex items-center justify-center transition-all ${selectedCategory === cat.id ? 'bg-cyan-500 scale-110 shadow-lg shadow-cyan-500/50' : 'bg-white/10 hover:bg-white/20 hover:scale-105'}`}
-                  >
-                    {cat.icon}
-                  </button>
-                ))}
-              </div>
-
-              {selectedCategory === 'custom' && (
-                <div className="mb-4 animate-fade-in">
-                  <textarea
-                    className="w-full bg-black/30 border border-white/20 rounded-xl p-3 text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
-                    rows="3"
-                    placeholder="Enter comma separated words (e.g. Apple, Banana, Orange)"
-                    value={customWords}
-                    onChange={(e) => setCustomWords(e.target.value)}
-                  ></textarea>
-                </div>
-              )}
-
-              <div className="mt-auto pt-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="btn btn-primary w-full py-4 text-xl font-black tracking-widest"
-                  onClick={startGame}
+            <div className="font-bold mb-2 text-sm md:text-base shrink-0">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
+            
+            {/* Category Grid */}
+            <div className="grid grid-cols-4 lg:grid-cols-6 gap-2 mb-4 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-[100px]">
+              {[
+                { id: 'random', icon: '🎲' },
+                { id: 'food', icon: '🍔' },
+                { id: 'animals', icon: '🐾' },
+                { id: 'countries', icon: '🌍' },
+                { id: 'sports', icon: '⚽' },
+                { id: 'vehicles', icon: '🚗' },
+                { id: 'clothing', icon: '👕' },
+                { id: 'nature', icon: '🌲' },
+                { id: 'movies', icon: '🎬' },
+                { id: 'music', icon: '🎵' },
+                { id: 'custom', icon: '✏️' }
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  title={CATEGORY_NAMES[cat.id]?.[lang] || cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`aspect-square rounded-2xl text-2xl md:text-4xl flex items-center justify-center transition-all ${selectedCategory === cat.id ? 'bg-cyan-500 scale-105 shadow-lg shadow-cyan-500/50' : 'bg-white/10 hover:bg-white/20 hover:scale-105'}`}
                 >
-                  {t('START_GAME') || t('start_game')}
-                </motion.button>
+                  {cat.icon}
+                </button>
+              ))}
+            </div>
+
+            {selectedCategory === 'custom' && (
+              <div className="mb-4 shrink-0 animate-fade-in">
+                <textarea
+                  className="w-full bg-black/30 border border-white/20 rounded-xl p-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+                  rows="2"
+                  placeholder="Enter comma separated words (e.g. Apple, Banana)"
+                  value={customWords}
+                  onChange={(e) => setCustomWords(e.target.value)}
+                ></textarea>
               </div>
+            )}
+
+            <button
+              className="btn btn-primary w-full py-3 md:py-4 text-lg md:text-xl font-black tracking-widest shrink-0 shadow-[0_0_20px_rgba(255,75,140,0.5)]"
+              onClick={startGame}
+            >
+              {t('START_GAME') || t('start_game')}
+            </button>
+          </motion.div>
+
+          {/* Tile 3: Ad Banner (Right) */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="glass-panel md:col-span-3 flex flex-col items-center justify-center p-0 overflow-hidden relative"
+          >
+            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30 pointer-events-none">
+              <span className="text-4xl mb-2">⭐</span>
+              <span className="text-xs tracking-widest uppercase font-bold text-white/50 text-center px-4">Sponsored Space</span>
+            </div>
+            <div className="relative z-10 w-full h-full flex items-center justify-center">
+              <AdBanner
+                slotId="7632905010"
+                style={{ width: '100%', height: '100%', minHeight: '250px' }}
+              />
             </div>
           </motion.div>
 
-          {/* Right Side: Players List */}
+          {/* Tile 4: Players List (Bottom Row) */}
           <motion.div
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ type: 'spring', bounce: 0.4, delay: 0.2 }}
-            className="flex-1 flex flex-col"
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="glass-panel md:col-span-12 flex flex-col p-4 md:p-6 overflow-hidden"
           >
-            <div className="glass-panel flex-1 flex flex-col p-6">
-              <h2 style={{ fontSize: '2rem', marginBottom: '20px', borderBottom: '2px solid rgba(255,255,255,0.1)', paddingBottom: '20px' }}>
-                {t('PLAYERS_LABEL')?.replace('{count}', players.length.toString()) || `Players (${players.length})`}
-              </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '15px', overflowY: 'auto' }}>
-                <AnimatePresence>
-                  {players.map((p) => (
-                    <motion.div
-                      key={p.id}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
-                      style={{
-                        background: 'rgba(255,255,255,0.1)',
-                        padding: '15px',
-                        borderRadius: '16px',
-                        textAlign: 'center'
-                      }}
-                    >
-                      <div style={{ fontSize: '3rem' }}>{p.emoji}</div>
-                      <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '10px' }}>{p.name}</div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+            <h2 className="text-xl md:text-2xl font-bold mb-4 border-b border-white/10 pb-2 shrink-0">
+              {t('PLAYERS_LABEL')?.replace('{count}', players.length.toString()) || `Players (${players.length})`}
+            </h2>
+            <div className="flex-1 flex flex-wrap gap-4 overflow-y-auto items-start content-start custom-scrollbar">
+              <AnimatePresence>
+                {players.length === 0 && (
+                  <div className="w-full text-center text-white/40 italic py-4">{t('WAITING_FOR_PLAYERS') || 'Waiting for players to join...'}</div>
+                )}
+                {players.map((p) => (
+                  <motion.div
+                    key={p.id}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    className="bg-white/10 p-3 md:p-4 rounded-2xl text-center min-w-[100px] md:min-w-[120px]"
+                  >
+                    <div className="text-3xl md:text-4xl mb-2">{p.emoji}</div>
+                    <div className="text-sm md:text-base font-bold truncate">{p.name}</div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </motion.div>
+
         </div>
       )}
 
