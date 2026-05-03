@@ -246,8 +246,6 @@ export default function HostView() {
               animate={{ scale: 1, opacity: 1 }}
               className="glass-panel w-full landscape:w-1/4 md:w-1/4 flex flex-col items-center justify-center text-center p-4 md:p-6 shrink-0"
             >
-              <h1 className="text-2xl md:text-3xl font-black text-accent mb-2">{t('join_the_game')}</h1>
-              {motto && <p className="text-pink-400 italic font-medium text-xs md:text-sm mb-4">"{motto}"</p>}
               
               <div className="bg-white p-3 md:p-4 rounded-2xl mb-4 shadow-lg shrink-0">
                 <QRCodeSVG value={joinUrl} size={160} className="w-28 h-28 md:w-36 md:h-36 lg:w-44 lg:h-44" />
@@ -273,8 +271,7 @@ export default function HostView() {
               transition={{ delay: 0.1 }}
               className="glass-panel w-full landscape:w-1/2 md:w-1/2 flex flex-col p-4 md:p-6 relative min-w-0"
             >
-              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 shrink-0">
-                <h2 className="text-2xl md:text-3xl font-bold">{t('SETUP_TITLE') || 'Game Setup'}</h2>
+              <div className="flex justify-end items-center mb-6 border-b border-white/10 pb-4 shrink-0">
                 
                 <div className="flex items-center gap-3">
                   <div className="flex bg-white/5 rounded-xl border border-white/10 overflow-hidden">
@@ -392,9 +389,6 @@ export default function HostView() {
             transition={{ delay: 0.3 }}
             className="glass-panel h-1/4 min-h-[150px] shrink-0 flex flex-col p-4 md:p-6 overflow-hidden"
           >
-            <h2 className="text-xl md:text-2xl font-bold mb-4 border-b border-white/10 pb-2 shrink-0">
-              {t('PLAYERS_LABEL')?.replace('{count}', players.length.toString()) || `Players (${players.length})`}
-            </h2>
             <div className="flex-1 flex flex-wrap gap-4 overflow-y-auto items-start content-start custom-scrollbar">
               <AnimatePresence>
                 {players.length === 0 && (
