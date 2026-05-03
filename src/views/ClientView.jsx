@@ -3,16 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import AdBanner from '../components/AdBanner';
+import { useTranslation } from 'react-i18next';
 
 const EMOJIS = ['😎', '🤠', '👽', '👻', '🤖', '💩', '🦄', '🦖'];
 const AVATARS = ['boy', 'girl', 'bear', 'cat']; // We can map these to images later
 
 export default function ClientView() {
+  const { t } = useTranslation();
   const [pin, setPin] = useState(new URLSearchParams(window.location.search).get('pin') || '');
   const [name, setName] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState(null);
-  const [phase, setPhase] = useState('join'); // join, profile, waiting, game
+  const [phase, setPhase] = useState('join'); // join, profile, waiting, role_reveal, questioning, voting
   const [roomChannel, setRoomChannel] = useState(null);
+  
+  const [myId, setMyId] = useState('');
+  const [gameConfig, setGameConfig] = useState(null);
+  const [players, setPlayers] = useState([]);
 
   useEffect(() => {
     return () => {
@@ -27,14 +33,24 @@ export default function ClientView() {
   const handleReady = async () => {
     if (name && selectedEmoji) {
       setPhase('waiting');
-      
+      const uniqueId = Math.random().toString(36).substr(2, 9);
+      setMyId(uniqueId);
+
       const channel = supabase.channel(`room:${pin}`);
-      
+
       channel.on('broadcast', { event: 'state_change' }, (payload) => {
-        const { gameState } = payload.payload;
-        if (gameState === 'game') setPhase('game');
+        const { gameState, gameConfig, players } = payload.payload;
+        if (gameConfig) setGameConfig(gameConfig);
+        if (players) setPlayers(players);
+        
+        if (gameState === 'role_reveal') setPhase('role_reveal');
+        if (gameState === 'questioning') setPhase('questioning');
+        if (gameState === 'voting') setPhase('voting');
         if (gameState === 'leaderboard') setPhase('waiting');
-        if (gameState === 'lobby') setPhase('waiting');
+        if (gameState === 'lobby') {
+          setPhase('waiting');
+          setGameConfig(null);
+        }
       });
 
       channel.on('presence', { event: 'sync' }, () => {
@@ -44,7 +60,7 @@ export default function ClientView() {
       await channel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await channel.track({
-            id: Math.random().toString(36).substr(2, 9), // simple unique ID
+            id: uniqueId,
             name: name,
             emoji: selectedEmoji
           });
@@ -60,7 +76,7 @@ export default function ClientView() {
       <AnimatePresence mode="wait">
         {/* Join Phase */}
         {phase === 'join' && (
-          <motion.div 
+          <motion.div
             key="join"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -68,15 +84,15 @@ export default function ClientView() {
             style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           >
             <h1 style={{ fontSize: '3rem', textAlign: 'center', marginBottom: '40px', color: 'var(--primary)' }}>Play Now!</h1>
-            <input 
-              type="number" 
-              className="input-premium" 
-              placeholder="Game PIN" 
+            <input
+              type="number"
+              className="input-premium"
+              placeholder="Game PIN"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
               style={{ marginBottom: '20px' }}
             />
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="btn btn-primary"
@@ -94,7 +110,7 @@ export default function ClientView() {
 
         {/* Profile Phase */}
         {phase === 'profile' && (
-          <motion.div 
+          <motion.div
             key="profile"
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
@@ -102,14 +118,14 @@ export default function ClientView() {
             style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           >
             <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Who are you?</h2>
-            <input 
-              type="text" 
-              className="input-premium" 
-              placeholder="Nickname" 
+            <input
+              type="text"
+              className="input-premium"
+              placeholder="Nickname"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            
+
             <div className="emoji-grid">
               {EMOJIS.map(emoji => (
                 <motion.button
@@ -124,7 +140,7 @@ export default function ClientView() {
               ))}
             </div>
 
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="btn btn-accent"
@@ -139,55 +155,97 @@ export default function ClientView() {
 
         {/* Waiting Phase */}
         {phase === 'waiting' && (
-          <motion.div 
+          <motion.div
             key="waiting"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
           >
-            <motion.div 
+            <motion.div
               animate={{ y: [0, -20, 0] }}
               transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
               style={{ fontSize: '6rem', marginBottom: '20px' }}
             >
               {selectedEmoji}
             </motion.div>
-            <h2 style={{ fontSize: '2.5rem', color: 'var(--success)', textAlign: 'center' }}>You're in!</h2>
-            <p style={{ marginTop: '10px', color: 'var(--text-muted)' }}>Look at the TV...</p>
-            
-            {/* Dev skip button */}
-            <button style={{marginTop: '50px', background: 'transparent', border: 'none', color: 'white'}} onClick={() => setPhase('game')}>[Dev: Start Game]</button>
+            <h2 style={{ fontSize: '2.5rem', color: 'var(--success)', textAlign: 'center' }}>{t('youre_in')}</h2>
+            <p style={{ marginTop: '10px', color: 'var(--text-muted)' }}>{t('look_at_tv')}</p>
           </motion.div>
         )}
 
-        {/* Game Phase (Controller) */}
-        {phase === 'game' && (
-          <motion.div 
-            key="game"
+        {phase === 'role_reveal' && (
+          <motion.div
+            key="role_reveal"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
+          >
+            {gameConfig?.imposterId === myId ? (
+              <>
+                <h1 style={{ fontSize: '3rem', color: '#FF4B4B', marginBottom: '20px' }}>{t('you_are_imposter')}</h1>
+                <p style={{ fontSize: '1.5rem', color: 'var(--text-muted)' }}>{t('shhh')}</p>
+              </>
+            ) : (
+              <>
+                <h2 style={{ fontSize: '2rem', color: 'var(--text-muted)' }}>{t('secret_word')}</h2>
+                <h1 style={{ fontSize: '4rem', color: 'var(--success)', marginTop: '20px' }}>{gameConfig?.word}</h1>
+              </>
+            )}
+          </motion.div>
+        )}
+
+        {phase === 'questioning' && (
+          <motion.div
+            key="questioning"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
+          >
+            <h2 style={{ fontSize: '2.5rem', color: 'var(--primary)' }}>{t('look_at_tv')}</h2>
+          </motion.div>
+        )}
+
+        {phase === 'voting' && (
+          <motion.div
+            key="voting"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
             style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
           >
-            <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Select the Imposter!</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', flex: 1 }}>
-              {/* Mock controller buttons */}
-              {['Red', 'Blue', 'Green', 'Yellow'].map((color, i) => (
+            <h2 style={{ textAlign: 'center', marginBottom: '20px', fontSize: '2rem', color: 'var(--accent)' }}>{t('select_imposter')}</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', flex: 1, overflowY: 'auto', paddingBottom: '20px' }}>
+              {players.filter(p => p.id !== myId).map((p, i) => (
                 <motion.button
-                  key={color}
+                  key={p.id}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   style={{
-                    background: ['#FF4B4B', '#4B96FF', '#4BFF96', '#FFD14B'][i],
+                    background: ['#FF4B4B', '#4B96FF', '#4BFF96', '#FFD14B', '#9D4BFF', '#FF8C4B'][i % 6],
                     border: 'none',
                     borderRadius: '24px',
-                    color: i === 3 ? 'black' : 'white',
+                    color: ['#4BFF96', '#FFD14B'].includes(['#FF4B4B', '#4B96FF', '#4BFF96', '#FFD14B', '#9D4BFF', '#FF8C4B'][i % 6]) ? 'black' : 'white',
                     fontSize: '1.5rem',
                     fontWeight: 'bold',
-                    boxShadow: '0 8px 0 rgba(0,0,0,0.2)'
+                    boxShadow: '0 8px 0 rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '20px'
                   }}
-                  onClick={() => setPhase('waiting')}
+                  onClick={() => {
+                    if (roomChannel) {
+                      roomChannel.send({
+                        type: 'broadcast',
+                        event: 'vote',
+                        payload: { voterId: myId, votedForId: p.id }
+                      });
+                    }
+                    setPhase('waiting');
+                  }}
                 >
-                  {color}
+                  <span style={{ fontSize: '3rem', marginBottom: '10px' }}>{p.emoji}</span>
+                  {p.name}
                 </motion.button>
               ))}
             </div>
@@ -197,9 +255,9 @@ export default function ClientView() {
 
       {/* Persistent Ad Banner at the bottom */}
       <div className="ad-banner" style={{ overflow: 'hidden' }}>
-        <AdBanner 
-          slotId="YOUR_BANNER_SLOT_ID" 
-          style={{ width: '100%', height: '60px' }} 
+        <AdBanner
+          slotId="2412367923"
+          style={{ width: '100%', height: '60px' }}
         />
       </div>
     </div>

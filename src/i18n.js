@@ -21,7 +21,18 @@ const resources = {
       "im_ready": "I'm Ready!",
       "youre_in": "You're in!",
       "look_at_tv": "Look at the TV...",
-      "select_imposter": "Select the Imposter!"
+      "select_imposter": "Select the Imposter!",
+      "category": "Category",
+      "secret_word": "Secret Word",
+      "you_are_imposter": "You are the Imposter!",
+      "shhh": "Shhh! Don't let anyone know.",
+      "ask_a_question": "ask a question!",
+      "to": "to",
+      "time_to_vote": "Time to vote!",
+      "vote_on_devices": "Vote on your devices now",
+      "imposter_was": "The Imposter was",
+      "imposter_wins": "The Imposter tricked everyone!",
+      "players_win": "The players caught the Imposter!"
     }
   },
   ar: {
@@ -43,7 +54,18 @@ const resources = {
       "im_ready": "أنا مستعد!",
       "youre_in": "لقد دخلت!",
       "look_at_tv": "انظر إلى التلفاز...",
-      "select_imposter": "اختر المحتال!"
+      "select_imposter": "اختر المحتال!",
+      "category": "الفئة",
+      "secret_word": "الكلمة السرية",
+      "you_are_imposter": "أنت هو المحتال!",
+      "shhh": "صه! لا تدع أحداً يعرف.",
+      "ask_a_question": "اطرح سؤالاً!",
+      "to": "على",
+      "time_to_vote": "حان وقت التصويت!",
+      "vote_on_devices": "صوّت من جهازك الآن",
+      "imposter_was": "المحتال كان",
+      "imposter_wins": "المحتال خدع الجميع!",
+      "players_win": "اكتشف اللاعبون المحتال!"
     }
   }
 };

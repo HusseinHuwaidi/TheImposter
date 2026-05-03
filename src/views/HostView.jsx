@@ -4,21 +4,35 @@ import { QRCodeSVG } from 'qrcode.react';
 
 import { supabase } from '../lib/supabase';
 import AdBanner from '../components/AdBanner';
+import { useTranslation } from 'react-i18next';
+
+const CATEGORIES = {
+  "Animals": ["Elephant", "Lion", "Giraffe", "Penguin", "Shark"],
+  "Locations": ["Hospital", "School", "Beach", "Space Station", "Supermarket"],
+  "Food": ["Pizza", "Sushi", "Hamburger", "Ice Cream", "Salad"],
+  "Jobs": ["Doctor", "Teacher", "Police Officer", "Astronaut", "Chef"]
+};
 
 export default function HostView() {
+  const { t } = useTranslation();
   const [pin, setPin] = useState('');
   const [players, setPlayers] = useState([]);
-  const [gameState, setGameState] = useState('lobby'); // lobby, game, leaderboard
+  const [gameState, setGameState] = useState('lobby'); // lobby, role_reveal, questioning, voting, leaderboard
   const [roomChannel, setRoomChannel] = useState(null);
+  
+  // Game Engine States
+  const [gameConfig, setGameConfig] = useState({ category: '', word: '', imposterId: null });
+  const [turnState, setTurnState] = useState({ askerIndex: 0, answererIndex: 1 });
+  const [votes, setVotes] = useState({});
 
   useEffect(() => {
     // Generate a random 6 digit PIN
     const newPin = Math.floor(100000 + Math.random() * 900000).toString();
     setPin(newPin);
-    
+
     // Initialize Supabase Room with this PIN
     const channel = supabase.channel(`room:${newPin}`);
-    
+
     channel
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
@@ -27,6 +41,10 @@ export default function HostView() {
           activePlayers.push(state[id][0]); // Get the first presence instance for each user
         }
         setPlayers(activePlayers);
+      })
+      .on('broadcast', { event: 'vote' }, (payload) => {
+        const { voterId, votedForId } = payload.payload;
+        setVotes(prev => ({ ...prev, [voterId]: votedForId }));
       })
       .subscribe();
 
@@ -37,14 +55,52 @@ export default function HostView() {
     };
   }, []);
 
-  const broadcastStateChange = async (newState) => {
+  const broadcastStateChange = async (newState, extraPayload = {}) => {
     setGameState(newState);
     if (roomChannel) {
       await roomChannel.send({
         type: 'broadcast',
         event: 'state_change',
-        payload: { gameState: newState },
+        payload: { gameState: newState, ...extraPayload },
       });
+    }
+  };
+
+  const startGame = () => {
+    if (players.length < 3) {
+      alert("Need at least 3 players to start!");
+      return;
+    }
+
+    const categoriesList = Object.keys(CATEGORIES);
+    const randomCategory = categoriesList[Math.floor(Math.random() * categoriesList.length)];
+    const wordsList = CATEGORIES[randomCategory];
+    const randomWord = wordsList[Math.floor(Math.random() * wordsList.length)];
+    
+    const randomImposterIndex = Math.floor(Math.random() * players.length);
+    const imposterId = players[randomImposterIndex].id;
+
+    const newConfig = { category: randomCategory, word: randomWord, imposterId };
+    setGameConfig(newConfig);
+    
+    // Reset turns and votes
+    setTurnState({ askerIndex: 0, answererIndex: 1 });
+    setVotes({});
+
+    // Broadcast the role reveal phase with the game config
+    broadcastStateChange('role_reveal', { gameConfig: newConfig, players });
+  };
+
+  const nextTurn = () => {
+    let nextAsker = turnState.askerIndex + 1;
+    let nextAnswerer = (nextAsker + 1) % players.length;
+
+    if (nextAsker >= players.length) {
+      // Everyone has asked a question, move to voting
+      broadcastStateChange('voting');
+    } else {
+      setTurnState({ askerIndex: nextAsker, answererIndex: nextAnswerer });
+      broadcastStateChange('questioning', { turnState: { askerIndex: nextAsker, answererIndex: nextAnswerer } });
     }
   };
 
@@ -55,9 +111,9 @@ export default function HostView() {
     <div className="view-host">
       {gameState === 'lobby' && (
         <div style={{ display: 'flex', width: '100%', padding: '40px' }}>
-          
+
           {/* Left Side: QR Code & Pin */}
-          <motion.div 
+          <motion.div
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ type: 'spring', bounce: 0.4 }}
@@ -71,20 +127,20 @@ export default function HostView() {
               <h2 style={{ fontSize: '2rem', marginTop: '30px' }}>Go to <span style={{ color: 'var(--primary)' }}>{window.location.host}</span></h2>
               <h2 style={{ fontSize: '2rem' }}>Game PIN: <span style={{ fontSize: '4rem', fontWeight: '900', letterSpacing: '4px' }}>{pin}</span></h2>
             </div>
-            
-            <motion.button 
+
+            <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="btn btn-primary"
               style={{ marginTop: '40px', fontSize: '1.5rem', padding: '20px 60px' }}
-              onClick={() => broadcastStateChange('game')}
+              onClick={startGame}
             >
-              Start Game
+              {t('start_game')}
             </motion.button>
           </motion.div>
 
           {/* Right Side: Players List */}
-          <motion.div 
+          <motion.div
             initial={{ x: 100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ type: 'spring', bounce: 0.4, delay: 0.2 }}
@@ -102,9 +158,9 @@ export default function HostView() {
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      style={{ 
-                        background: 'rgba(255,255,255,0.1)', 
-                        padding: '20px', 
+                      style={{
+                        background: 'rgba(255,255,255,0.1)',
+                        padding: '20px',
                         borderRadius: '16px',
                         textAlign: 'center'
                       }}
@@ -117,29 +173,81 @@ export default function HostView() {
               </div>
             </div>
           </motion.div>
-          
+
         </div>
       )}
 
-      {/* Game State Placeholder */}
-      {gameState === 'game' && (
-        <motion.div 
+      {gameState === 'role_reveal' && (
+        <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="glass-panel"
           style={{ margin: 'auto', textAlign: 'center', maxWidth: '800px', width: '100%' }}
         >
-          <h1 style={{ fontSize: '4rem', color: 'var(--primary)' }}>Who is the Imposter?</h1>
-          <p style={{ fontSize: '2rem', marginTop: '20px', color: 'var(--text-muted)' }}>Look at your devices!</p>
+          <h1 style={{ fontSize: '4rem', color: 'var(--primary)' }}>{t('look_at_devices')}</h1>
+          <p style={{ fontSize: '2rem', marginTop: '20px', color: 'var(--text-muted)' }}>{t('category')}: {gameConfig.category}</p>
           
-          <motion.button 
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="btn btn-accent"
+            style={{ marginTop: '60px' }}
+            onClick={nextTurn}
+          >
+            Start Questioning
+          </motion.button>
+        </motion.div>
+      )}
+
+      {gameState === 'questioning' && (
+        <motion.div
+          key={`turn-${turnState.askerIndex}`}
+          initial={{ x: 100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: -100, opacity: 0 }}
+          className="glass-panel"
+          style={{ margin: 'auto', textAlign: 'center', maxWidth: '800px', width: '100%' }}
+        >
+          <h1 style={{ fontSize: '3rem', color: 'var(--text)' }}>
+            <span style={{ color: 'var(--primary)', fontSize: '4rem' }}>{players[turnState.askerIndex]?.name} {players[turnState.askerIndex]?.emoji}</span>
+            <br />
+            {t('ask_a_question')} {t('to')}
+            <br />
+            <span style={{ color: 'var(--secondary)', fontSize: '4rem' }}>{players[turnState.answererIndex]?.name} {players[turnState.answererIndex]?.emoji}</span>
+          </h1>
+          
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="btn btn-primary"
+            style={{ marginTop: '60px' }}
+            onClick={nextTurn}
+          >
+            Next Turn
+          </motion.button>
+        </motion.div>
+      )}
+
+      {gameState === 'voting' && (
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="glass-panel"
+          style={{ margin: 'auto', textAlign: 'center', maxWidth: '800px', width: '100%' }}
+        >
+          <h1 style={{ fontSize: '4rem', color: 'var(--primary)' }}>{t('who_is_imposter')}</h1>
+          <p style={{ fontSize: '2rem', marginTop: '20px', color: 'var(--text-muted)' }}>{t('vote_on_devices')}</p>
+          
+          <h3 style={{ marginTop: '40px' }}>Votes Cast: {Object.keys(votes).length} / {players.length}</h3>
+
+          <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="btn btn-accent"
             style={{ marginTop: '60px' }}
             onClick={() => broadcastStateChange('leaderboard')}
           >
-            End Round
+            Reveal Imposter
           </motion.button>
         </motion.div>
       )}
@@ -147,37 +255,38 @@ export default function HostView() {
       {/* Leaderboard State + Interstitial Ad */}
       {gameState === 'leaderboard' && (
         <div style={{ display: 'flex', width: '100%', padding: '40px', gap: '40px' }}>
-          <motion.div 
+          <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="glass-panel"
             style={{ flex: 1, textAlign: 'center' }}
           >
-            <h1 style={{ fontSize: '3.5rem', color: 'var(--accent)', marginBottom: '40px' }}>Leaderboard</h1>
-            {/* Mock Leaderboard */}
-            <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '16px', marginBottom: '16px' }}>
-              <div style={{ fontSize: '2.5rem', marginRight: '20px' }}>🥇</div>
-              <div style={{ fontSize: '2rem', flex: 1, textAlign: 'left' }}>Ali 😎</div>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>3 Correct</div>
-            </div>
+            <h1 style={{ fontSize: '3.5rem', color: 'var(--accent)', marginBottom: '40px' }}>{t('leaderboard')}</h1>
             
-            <motion.button 
+            <div style={{ background: 'rgba(255,255,255,0.1)', padding: '30px', borderRadius: '24px', marginBottom: '30px' }}>
+              <h2 style={{ fontSize: '2.5rem', color: 'var(--primary)' }}>{t('imposter_was')}</h2>
+              <div style={{ fontSize: '5rem', margin: '20px 0' }}>
+                {players.find(p => p.id === gameConfig.imposterId)?.emoji}
+              </div>
+              <h3 style={{ fontSize: '2rem' }}>{players.find(p => p.id === gameConfig.imposterId)?.name}</h3>
+            </div>
+
+            <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="btn btn-primary"
-              style={{ marginTop: '40px' }}
+              style={{ marginTop: '20px', padding: '15px 40px', fontSize: '1.5rem' }}
               onClick={() => broadcastStateChange('lobby')}
             >
-              Next Game
+              {t('next_game')}
             </motion.button>
-
           </motion.div>
-          
+
           {/* Interstitial Ad Space */}
           <div style={{ width: '300px', background: 'rgba(0,0,0,0.3)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', overflow: 'hidden' }}>
-            <AdBanner 
-              slotId="YOUR_INTERSTITIAL_SLOT_ID" 
-              style={{ width: '300px', height: '600px' }} 
+            <AdBanner
+              slotId="7632905010"
+              style={{ width: '300px', height: '600px' }}
             />
           </div>
         </div>
