@@ -175,15 +175,15 @@ export default function HostView() {
       {showCredits && <CreditsModal onClose={() => setShowCredits(false)} />}
 
       {gameState === 'lobby' && (
-        <div style={{ display: 'flex', width: '100%', height: '100%', padding: '2vw', boxSizing: 'border-box' }}>
+        <div className="w-full h-full p-8 box-border flex gap-8">
           {/* Left Side: Setup & Settings */}
           <motion.div
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ type: 'spring', bounce: 0.4 }}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingRight: '20px' }}
+            className="flex-1 flex flex-col gap-6"
           >
-            <div className="glass-panel" style={{ textAlign: 'center', flex: '0 0 auto', padding: 'min(20px, 2vh)' }}>
+            <div className="glass-panel text-center flex-none p-6">
               <h1 style={{ fontSize: 'min(2.5rem, 4vh)', margin: 0, color: 'var(--accent)' }}>{t('join_the_game')}</h1>
               {motto && <p className="text-pink-400 italic font-medium mt-1 mb-3 text-sm md:text-base">"{motto}"</p>}
               
@@ -200,7 +200,7 @@ export default function HostView() {
             </div>
 
             {/* Game Settings */}
-            <div className="glass-panel mt-4 flex-1 flex flex-col overflow-y-auto" style={{ padding: '20px' }}>
+            <div className="glass-panel flex-1 flex flex-col overflow-y-auto p-6">
               <h2 className="text-xl font-bold mb-4 border-b border-white/10 pb-2">{t('SETUP_TITLE') || 'Game Setup'}</h2>
               
               {/* Hard Mode Toggle */}
@@ -218,31 +218,29 @@ export default function HostView() {
 
               {/* Category Selector */}
               <div className="font-bold mb-2">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 mb-4">
-                <button
-                  onClick={() => setSelectedCategory('random')}
-                  className={`p-2 rounded-lg text-sm font-bold flex flex-col items-center justify-center gap-1 transition-colors ${selectedCategory === 'random' ? 'bg-cyan-500 text-slate-900' : 'bg-white/10 hover:bg-white/20'}`}
-                >
-                  <span className="text-2xl">🎲</span>
-                  <span className="truncate w-full text-center">Random</span>
-                </button>
-                {Object.keys(SubjectDatabase).map((cat) => (
+              <div className="flex flex-wrap gap-3 mb-4">
+                {[
+                  { id: 'random', icon: '🎲' },
+                  { id: 'food', icon: '🍔' },
+                  { id: 'animals', icon: '🐾' },
+                  { id: 'countries', icon: '🌍' },
+                  { id: 'sports', icon: '⚽' },
+                  { id: 'vehicles', icon: '🚗' },
+                  { id: 'clothing', icon: '👕' },
+                  { id: 'nature', icon: '🌲' },
+                  { id: 'movies', icon: '🎬' },
+                  { id: 'music', icon: '🎵' },
+                  { id: 'custom', icon: '✏️' }
+                ].map((cat) => (
                   <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`p-2 rounded-lg text-sm font-bold flex flex-col items-center justify-center gap-1 transition-colors ${selectedCategory === cat ? 'bg-cyan-500 text-slate-900' : 'bg-white/10 hover:bg-white/20'}`}
+                    key={cat.id}
+                    title={CATEGORY_NAMES[cat.id]?.[lang] || cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`w-14 h-14 rounded-2xl text-3xl flex items-center justify-center transition-all ${selectedCategory === cat.id ? 'bg-cyan-500 scale-110 shadow-lg shadow-cyan-500/50' : 'bg-white/10 hover:bg-white/20 hover:scale-105'}`}
                   >
-                    <span className="text-2xl">{SubjectDatabase[cat][0]?.emoji || '📂'}</span>
-                    <span className="truncate w-full text-center">{CATEGORY_NAMES[cat]?.[lang] || cat}</span>
+                    {cat.icon}
                   </button>
                 ))}
-                <button
-                  onClick={() => setSelectedCategory('custom')}
-                  className={`p-2 rounded-lg text-sm font-bold flex flex-col items-center justify-center gap-1 transition-colors ${selectedCategory === 'custom' ? 'bg-pink-500 text-white' : 'bg-white/10 hover:bg-white/20'}`}
-                >
-                  <span className="text-2xl">✏️</span>
-                  <span className="truncate w-full text-center">{CATEGORY_NAMES['custom']?.[lang] || 'Custom'}</span>
-                </button>
               </div>
 
               {selectedCategory === 'custom' && (
@@ -275,9 +273,9 @@ export default function HostView() {
             initial={{ x: 100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ type: 'spring', bounce: 0.4, delay: 0.2 }}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+            className="flex-1 flex flex-col"
           >
-            <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-panel flex-1 flex flex-col p-6">
               <h2 style={{ fontSize: '2rem', marginBottom: '20px', borderBottom: '2px solid rgba(255,255,255,0.1)', paddingBottom: '20px' }}>
                 {t('PLAYERS_LABEL')?.replace('{count}', players.length.toString()) || `Players (${players.length})`}
               </h2>
