@@ -112,6 +112,13 @@ body {
   overflow: hidden;
 }
 
+body.low-performance .glass-panel {
+  background: rgba(42, 42, 60, 0.98);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+}
+
 .glass-panel::before {
   content: '';
   position: absolute;
@@ -156,6 +163,12 @@ body {
 @keyframes floatOrb2 {
   0% { transform: translate(0, 0) scale(1); }
   100% { transform: translate(-10%, -10%) scale(1.15); }
+}
+
+body.low-performance .view-host::before,
+body.low-performance .view-host::after {
+  display: none !important;
+  animation: none !important;
 }
 
 .view-client {

@@ -1,27 +1,38 @@
 import { useState, useEffect } from 'react';
 
 export function usePerformanceMode() {
-  const [isLowPerformance, setIsLowPerformance] = useState(false);
+  const [isLowPerformance, setIsLowPerformance] = useState(true); // GUILTY UNTIL PROVEN INNOCENT
 
   useEffect(() => {
-    // 1. Check if user explicitly prefers reduced motion
+    // 1. Check if user explicitly prefers reduced motion (if so, stay low perf)
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
-    // 2. Hardware heuristics (Logical Cores & RAM)
-    // Many smart TVs have 4 or fewer cores and limited RAM
+    // 2. Hardware heuristics
     const cores = navigator.hardwareConcurrency || 4;
-    const memory = navigator.deviceMemory || 4;
-    const isLowHardware = cores <= 4 || memory < 4;
+    const isPowerfulHardware = cores > 4;
 
-    // 3. User Agent TV Detection
+    // 3. User Agent High-End Whitelist
     const ua = navigator.userAgent.toLowerCase();
+    const isHighEndDevice = /iphone|ipad|macintosh|windows|pixel|sm-|galaxy/.test(ua);
+    
+    // 4. Ensure it's not a known TV pretending to be something else
     const isTV = /smart-tv|smarttv|tizen|webos|roku|crkey|appletv|aftv|android tv|viera|netcast|hisense/.test(ua);
 
-    // If it's a TV, or explicitly requests reduced motion, or has very low hardware specs, enable low performance mode.
-    // TVs are almost universally terrible at rendering continuous SVG/Framer motion animations.
-    if (prefersReducedMotion || isTV || (isLowHardware && isTV)) {
-      setIsLowPerformance(true);
+    // If it's a powerful high-end device, not a TV, and doesn't want reduced motion, enable eye-candy!
+    let isLow = true;
+    if (isPowerfulHardware && isHighEndDevice && !isTV && !prefersReducedMotion) {
+      isLow = false;
     }
+
+    setIsLowPerformance(isLow);
+
+    // Toggle body class for pure CSS optimizations
+    if (isLow) {
+      document.body.classList.add('low-performance');
+    } else {
+      document.body.classList.remove('low-performance');
+    }
+    
   }, []);
 
   return isLowPerformance;

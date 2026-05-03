@@ -17,6 +17,8 @@ export function AnimatedGridPattern({
 }) {
   const id = useId();
 
+  if (isLowPerformance) return null;
+
   // Generate random coordinates for pulsing squares
   const getPos = () => [
     Math.floor((Math.random() * 1000) / width),

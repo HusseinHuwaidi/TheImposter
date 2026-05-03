@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -8,8 +8,10 @@ import { useTranslation } from 'react-i18next';
 
 import { SubjectDatabase, CATEGORY_NAMES } from '../lib/SubjectDatabase';
 import mottosData from '../lib/mottos.json';
-import LanguageSelector from '../components/LanguageSelector';
-import CreditsModal from '../components/CreditsModal';
+
+const LanguageSelector = lazy(() => import('../components/LanguageSelector'));
+const CreditsModal = lazy(() => import('../components/CreditsModal'));
+
 import { ShinyButton } from '../components/ui/ShinyButton';
 import { AnimatedGridPattern } from '../components/ui/AnimatedGridPattern';
 import { TextReveal } from '../components/ui/TextReveal';
@@ -216,7 +218,9 @@ export default function HostView() {
       
       {/* Top Bar for Language & Credits */}
       <div className="absolute top-4 start-4 z-50 flex items-center gap-4">
-        <LanguageSelector />
+        <Suspense fallback={<div className="w-8 h-8 rounded bg-white/10" />}>
+          <LanguageSelector />
+        </Suspense>
         <button 
           onClick={() => setShowCredits(true)}
           className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm border border-white/20 text-xl"
@@ -226,7 +230,9 @@ export default function HostView() {
         </button>
       </div>
 
-      {showCredits && <CreditsModal onClose={() => setShowCredits(false)} />}
+      <Suspense fallback={null}>
+        {showCredits && <CreditsModal onClose={() => setShowCredits(false)} />}
+      </Suspense>
 
       {gameState === 'lobby' && (
         <div className="w-full min-h-[100dvh] p-4 md:p-8 box-border flex flex-col gap-4 md:gap-6 relative z-10 pb-16">
