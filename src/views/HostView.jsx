@@ -251,8 +251,8 @@ export default function HostView() {
                 <QRCodeSVG value={joinUrl} size={160} className="w-28 h-28 md:w-36 md:h-36 lg:w-44 lg:h-44" />
               </div>
               
-              <h2 className="text-lg md:text-xl">{t('game_pin')}</h2>
-              <div className="text-2xl md:text-3xl font-black tracking-widest text-white drop-shadow-md">
+              <h2 className="text-sm md:text-base text-white/70 uppercase tracking-widest mb-1">{t('game_pin')}</h2>
+              <div className="text-xl md:text-2xl font-black tracking-widest text-white drop-shadow-md">
                 <TextReveal text={pin} className="justify-center" />
               </div>
               
@@ -316,13 +316,13 @@ export default function HostView() {
               )}
 
             <ShinyButton
-              className="w-full py-3 text-sm mb-8"
+              className="w-full py-3 text-sm mb-12"
               onClick={startGame}
             >
               {t('START_GAME') || t('start_game')}
             </ShinyButton>
 
-            <div className="flex justify-center items-center mt-auto border-t border-white/10 pt-4 shrink-0 w-full">
+            <div className="flex justify-center items-center mt-auto border-t border-white/10 pt-6 shrink-0 w-full gap-4">
               <div className="flex items-center gap-3">
                 <div className="flex bg-white/5 rounded-xl border border-white/10 overflow-hidden">
                   <button 
