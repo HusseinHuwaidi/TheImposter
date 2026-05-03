@@ -288,7 +288,7 @@ i18n
       escapeValue: false 
     },
     detection: {
-      order: ['navigator', 'querystring', 'localStorage', 'htmlTag', 'path', 'subdomain'],
+      order: ['localStorage', 'navigator', 'querystring', 'htmlTag', 'path', 'subdomain'],
       caches: ['localStorage']
     }
   });
