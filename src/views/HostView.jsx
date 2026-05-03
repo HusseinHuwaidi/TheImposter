@@ -185,93 +185,96 @@ export default function HostView() {
       {showCredits && <CreditsModal onClose={() => setShowCredits(false)} />}
 
       {gameState === 'lobby' && (
-        <div className="w-full h-[100vh] p-4 md:p-8 box-border grid grid-cols-1 md:grid-cols-12 grid-rows-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)] md:grid-rows-[minmax(0,2fr)_minmax(0,1fr)] gap-4 md:gap-6">
+        <div className="w-full h-[100vh] p-4 md:p-8 box-border flex flex-col gap-4 md:gap-6 relative z-10">
           
-          {/* Tile 1: Join Game (Left) */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="glass-panel md:col-span-3 flex flex-col items-center justify-center text-center p-4 md:p-6"
-          >
-            <h1 className="text-2xl md:text-3xl font-black text-accent mb-2">{t('join_the_game')}</h1>
-            {motto && <p className="text-pink-400 italic font-medium text-xs md:text-sm mb-4">"{motto}"</p>}
+          {/* Top Row */}
+          <div className="flex flex-col md:flex-row gap-4 md:gap-6 flex-1 min-h-0">
             
-            <div className="bg-white p-3 md:p-4 rounded-2xl mb-4 shadow-lg shrink-0">
-              <QRCodeSVG value={joinUrl} size={160} className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40" />
-            </div>
-            
-            <h2 className="text-lg md:text-xl">{t('game_pin')}</h2>
-            <div className="text-4xl md:text-5xl font-black tracking-widest text-white drop-shadow-md">
-              <TextReveal text={pin} className="justify-center" />
-            </div>
-            
-            <ShinyButton 
-              onClick={() => window.open(joinUrl, '_blank')}
-              className="mt-4 w-full py-2 text-sm"
+            {/* Tile 1: Join Game (Left) */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="glass-panel w-full md:w-[320px] flex flex-col items-center justify-center text-center p-4 md:p-6 shrink-0"
             >
-              {t('Join as Player') || 'Join as Player'}
-            </ShinyButton>
-          </motion.div>
-
-          {/* Tile 2: Game Setup (Center) */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="glass-panel md:col-span-6 flex flex-col p-4 md:p-6 relative"
-          >
-            <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-2 shrink-0">
-              <h2 className="text-xl md:text-2xl font-bold">{t('SETUP_TITLE') || 'Game Setup'}</h2>
+              <h1 className="text-2xl md:text-3xl font-black text-accent mb-2">{t('join_the_game')}</h1>
+              {motto && <p className="text-pink-400 italic font-medium text-xs md:text-sm mb-4">"{motto}"</p>}
               
-              <label className="flex items-center gap-2 cursor-pointer group bg-white/5 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors">
-                <div className="font-bold text-sm md:text-base text-pink-400">{t('HARD_MODE') || 'Hard Mode'}</div>
-                <div className="relative ml-2">
-                  <input type="checkbox" className="sr-only" checked={hardMode} onChange={(e) => setHardMode(e.target.checked)} />
-                  <div className={`block w-10 h-6 rounded-full transition-colors ${hardMode ? 'bg-pink-500' : 'bg-slate-700'}`}></div>
-                  <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${hardMode ? 'translate-x-4' : ''}`}></div>
-                </div>
-              </label>
-            </div>
-
-            <div className="font-bold mb-2 text-sm md:text-base shrink-0">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
-            
-            {/* Category Grid */}
-            <div className="grid grid-cols-4 lg:grid-cols-6 gap-2 mb-4 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-[100px]">
-              {[
-                { id: 'random', icon: '🎲' },
-                { id: 'food', icon: '🍔' },
-                { id: 'animals', icon: '🐾' },
-                { id: 'countries', icon: '🌍' },
-                { id: 'sports', icon: '⚽' },
-                { id: 'vehicles', icon: '🚗' },
-                { id: 'clothing', icon: '👕' },
-                { id: 'nature', icon: '🌲' },
-                { id: 'movies', icon: '🎬' },
-                { id: 'music', icon: '🎵' },
-                { id: 'custom', icon: '✏️' }
-              ].map((cat) => (
-                <button
-                  key={cat.id}
-                  title={CATEGORY_NAMES[cat.id]?.[lang] || cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`aspect-square rounded-2xl text-2xl md:text-4xl flex items-center justify-center transition-all ${selectedCategory === cat.id ? 'bg-cyan-500 scale-105 shadow-lg shadow-cyan-500/50' : 'bg-white/10 hover:bg-white/20 hover:scale-105'}`}
-                >
-                  {cat.icon}
-                </button>
-              ))}
-            </div>
-
-            {selectedCategory === 'custom' && (
-              <div className="mb-4 shrink-0 animate-fade-in">
-                <textarea
-                  className="w-full bg-black/30 border border-white/20 rounded-xl p-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
-                  rows="2"
-                  placeholder="Enter comma separated words (e.g. Apple, Banana)"
-                  value={customWords}
-                  onChange={(e) => setCustomWords(e.target.value)}
-                ></textarea>
+              <div className="bg-white p-3 md:p-4 rounded-2xl mb-4 shadow-lg shrink-0">
+                <QRCodeSVG value={joinUrl} size={160} className="w-28 h-28 md:w-36 md:h-36 lg:w-44 lg:h-44" />
               </div>
-            )}
+              
+              <h2 className="text-lg md:text-xl">{t('game_pin')}</h2>
+              <div className="text-4xl md:text-5xl font-black tracking-widest text-white drop-shadow-md">
+                <TextReveal text={pin} className="justify-center" />
+              </div>
+              
+              <ShinyButton 
+                onClick={() => window.open(joinUrl, '_blank')}
+                className="mt-6 w-full py-3 text-sm"
+              >
+                {t('Join as Player') || 'Join as Player'}
+              </ShinyButton>
+            </motion.div>
+
+            {/* Tile 2: Game Setup (Center) */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="glass-panel flex-1 flex flex-col p-4 md:p-6 relative min-w-0"
+            >
+              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 shrink-0">
+                <h2 className="text-2xl md:text-3xl font-bold">{t('SETUP_TITLE') || 'Game Setup'}</h2>
+                
+                <label className="flex items-center gap-3 cursor-pointer group bg-white/5 px-4 py-2 rounded-xl hover:bg-white/10 transition-colors">
+                  <div className="font-bold text-sm md:text-lg text-pink-400">{t('HARD_MODE') || 'Hard Mode'}</div>
+                  <div className="relative ml-2">
+                    <input type="checkbox" className="sr-only" checked={hardMode} onChange={(e) => setHardMode(e.target.checked)} />
+                    <div className={`block w-12 h-7 rounded-full transition-colors ${hardMode ? 'bg-pink-500' : 'bg-slate-700'}`}></div>
+                    <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${hardMode ? 'translate-x-5' : ''}`}></div>
+                  </div>
+                </label>
+              </div>
+
+              <div className="font-bold mb-6 text-lg md:text-xl shrink-0 text-center text-cyan-400 uppercase tracking-widest">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
+              
+              {/* Category Grid - Massive clickble emojis */}
+              <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mb-8 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-[150px]">
+                {[
+                  { id: 'random', icon: '🎲' },
+                  { id: 'food', icon: '🍔' },
+                  { id: 'animals', icon: '🐾' },
+                  { id: 'countries', icon: '🌍' },
+                  { id: 'sports', icon: '⚽' },
+                  { id: 'vehicles', icon: '🚗' },
+                  { id: 'clothing', icon: '👕' },
+                  { id: 'nature', icon: '🌲' },
+                  { id: 'movies', icon: '🎬' },
+                  { id: 'music', icon: '🎵' },
+                  { id: 'custom', icon: '✏️' }
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
+                    title={CATEGORY_NAMES[cat.id]?.[lang] || cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`text-6xl md:text-8xl transition-all duration-300 hover:scale-110 ${selectedCategory === cat.id ? 'scale-125 drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100 z-10 brightness-110' : 'opacity-40 hover:opacity-80 grayscale-[50%]'}`}
+                  >
+                    {cat.icon}
+                  </button>
+                ))}
+              </div>
+
+              {selectedCategory === 'custom' && (
+                <div className="mb-6 shrink-0 animate-fade-in w-full max-w-xl mx-auto">
+                  <textarea
+                    className="w-full bg-black/30 border border-white/20 rounded-xl p-4 text-base text-white placeholder-white/40 focus:outline-none focus:border-pink-500"
+                    rows="2"
+                    placeholder="Enter comma separated words (e.g. Apple, Banana, Orange)"
+                    value={customWords}
+                    onChange={(e) => setCustomWords(e.target.value)}
+                  ></textarea>
+                </div>
+              )}
 
             <ShinyButton
               className="w-full py-3 md:py-4 text-lg md:text-xl"
@@ -281,31 +284,33 @@ export default function HostView() {
             </ShinyButton>
           </motion.div>
 
-          {/* Tile 3: Ad Banner (Right) */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="glass-panel md:col-span-3 flex flex-col items-center justify-center p-0 overflow-hidden relative"
-          >
-            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30 pointer-events-none">
-              <span className="text-4xl mb-2">⭐</span>
-              <span className="text-xs tracking-widest uppercase font-bold text-white/50 text-center px-4">Sponsored Space</span>
-            </div>
-            <div className="relative z-10 w-full h-full flex items-center justify-center">
-              <AdBanner
-                slotId="7632905010"
-                style={{ width: '100%', height: '100%', minHeight: '250px' }}
-              />
-            </div>
-          </motion.div>
+            {/* Tile 3: Ad Banner (Right) */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="glass-panel w-full md:w-[320px] flex flex-col items-center justify-center p-0 overflow-hidden relative shrink-0"
+            >
+              <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30 pointer-events-none">
+                <span className="text-5xl mb-3 drop-shadow-md">⭐</span>
+                <span className="text-sm tracking-widest uppercase font-bold text-white/50 text-center px-4">Sponsored Space</span>
+              </div>
+              <div className="relative z-10 w-full h-full flex items-center justify-center">
+                <AdBanner
+                  slotId="7632905010"
+                  style={{ width: '100%', height: '100%', minHeight: '300px' }}
+                />
+              </div>
+            </motion.div>
+            
+          </div>
 
-          {/* Tile 4: Players List (Bottom Row) */}
+          {/* Bottom Row: Players List */}
           <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="glass-panel md:col-span-12 flex flex-col p-4 md:p-6 overflow-hidden"
+            className="glass-panel h-[200px] md:h-[250px] shrink-0 flex flex-col p-4 md:p-6 overflow-hidden"
           >
             <h2 className="text-xl md:text-2xl font-bold mb-4 border-b border-white/10 pb-2 shrink-0">
               {t('PLAYERS_LABEL')?.replace('{count}', players.length.toString()) || `Players (${players.length})`}
