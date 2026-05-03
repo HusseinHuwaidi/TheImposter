@@ -10,6 +10,10 @@ import { SubjectDatabase, CATEGORY_NAMES } from '../lib/SubjectDatabase';
 import mottosData from '../lib/mottos.json';
 import LanguageSelector from '../components/LanguageSelector';
 import CreditsModal from '../components/CreditsModal';
+import { ShinyButton } from '../components/ui/ShinyButton';
+import { AnimatedGridPattern } from '../components/ui/AnimatedGridPattern';
+import { TextReveal } from '../components/ui/TextReveal';
+import { MagneticButton } from '../components/ui/MagneticButton';
 
 export default function HostView() {
   const { i18n, t } = useTranslation();
@@ -160,16 +164,22 @@ export default function HostView() {
 
   return (
     <div className="view-host relative h-full w-full overflow-hidden text-white font-sans">
+      <AnimatedGridPattern className="text-white/5 opacity-50 z-0" maxOpacity={0.3} />
+      
       {/* Top Bar for Language & Credits */}
       <div className="absolute top-4 start-4 z-50 flex items-center gap-4">
-        <LanguageSelector />
-        <button 
-          onClick={() => setShowCredits(true)}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm border border-white/20 text-xl"
-          title="Credits"
-        >
-          🏆
-        </button>
+        <MagneticButton>
+          <LanguageSelector />
+        </MagneticButton>
+        <MagneticButton>
+          <button 
+            onClick={() => setShowCredits(true)}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm border border-white/20 text-xl"
+            title="Credits"
+          >
+            🏆
+          </button>
+        </MagneticButton>
       </div>
 
       {showCredits && <CreditsModal onClose={() => setShowCredits(false)} />}
@@ -191,14 +201,16 @@ export default function HostView() {
             </div>
             
             <h2 className="text-lg md:text-xl">{t('game_pin')}</h2>
-            <div className="text-4xl md:text-5xl font-black tracking-widest text-white drop-shadow-md">{pin}</div>
+            <div className="text-4xl md:text-5xl font-black tracking-widest text-white drop-shadow-md">
+              <TextReveal text={pin} className="justify-center" />
+            </div>
             
-            <button 
+            <ShinyButton 
               onClick={() => window.open(joinUrl, '_blank')}
-              className="mt-4 w-full bg-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 border border-cyan-500 text-cyan-400 font-bold py-2 rounded-xl transition-all text-sm"
+              className="mt-4 w-full py-2 text-sm"
             >
               {t('Join as Player') || 'Join as Player'}
-            </button>
+            </ShinyButton>
           </motion.div>
 
           {/* Tile 2: Game Setup (Center) */}
@@ -261,12 +273,12 @@ export default function HostView() {
               </div>
             )}
 
-            <button
-              className="btn btn-primary w-full py-3 md:py-4 text-lg md:text-xl font-black tracking-widest shrink-0 shadow-[0_0_20px_rgba(255,75,140,0.5)]"
+            <ShinyButton
+              className="w-full py-3 md:py-4 text-lg md:text-xl"
               onClick={startGame}
             >
               {t('START_GAME') || t('start_game')}
-            </button>
+            </ShinyButton>
           </motion.div>
 
           {/* Tile 3: Ad Banner (Right) */}
@@ -419,15 +431,12 @@ export default function HostView() {
               <h3 style={{ fontSize: '2rem' }}>{players.find(p => p.id === gameConfig.imposterId)?.name}</h3>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="btn btn-primary"
-              style={{ marginTop: '20px', padding: '15px 40px', fontSize: '1.5rem', alignSelf: 'center' }}
+            <ShinyButton
+              className="mt-5 px-10 py-4 text-xl"
               onClick={() => broadcastStateChange('lobby')}
             >
               {t('next_game')}
-            </motion.button>
+            </ShinyButton>
           </motion.div>
 
           {/* Interstitial Ad Space */}

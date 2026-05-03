@@ -5,6 +5,10 @@ import { supabase } from '../lib/supabase';
 import AdBanner from '../components/AdBanner';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
+import { ShinyButton } from '../components/ui/ShinyButton';
+import { AnimatedGridPattern } from '../components/ui/AnimatedGridPattern';
+import { TextReveal } from '../components/ui/TextReveal';
+import { MagneticButton } from '../components/ui/MagneticButton';
 
 const EMOJIS = ['😎', '🤠', '👽', '👻', '🤖', '💩', '🦄', '🦖'];
 const AVATARS = ['boy', 'girl', 'bear', 'cat']; // We can map these to images later
@@ -88,9 +92,13 @@ export default function ClientView() {
   const isImposterAware = isImposter && !gameConfig?.hardMode;
 
   return (
-    <div className="view-client relative">
+    <div className="view-client relative overflow-hidden h-full w-full">
+      <AnimatedGridPattern className="text-pink-500/10 z-0" maxOpacity={0.2} />
+      
       <div className="absolute top-4 start-4 z-50">
-        <LanguageSelector />
+        <MagneticButton>
+          <LanguageSelector />
+        </MagneticButton>
       </div>
 
       <AnimatePresence mode="wait">
@@ -103,23 +111,22 @@ export default function ClientView() {
             exit={{ opacity: 0, y: -50 }}
             style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           >
-            <h1 style={{ fontSize: '3rem', textAlign: 'center', marginBottom: '40px', color: 'var(--primary)' }}>{t('play_now') || 'Play Now!'}</h1>
+            <h1 className="text-4xl md:text-5xl font-black text-center mb-10 text-primary">
+              <TextReveal text={t('play_now') || 'Play Now!'} className="justify-center" />
+            </h1>
             <input
               type="number"
-              className="input-premium"
+              className="input-premium mb-6 z-10"
               placeholder={t('game_pin') || 'Game PIN'}
               value={pin}
               onChange={(e) => setPin(e.target.value)}
-              style={{ marginBottom: '20px' }}
             />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="btn btn-primary"
+            <ShinyButton
+              className="w-full text-xl z-10"
               onClick={handleJoin}
             >
               {t('enter') || 'Enter'}
-            </motion.button>
+            </ShinyButton>
             <div style={{ marginTop: '30px', textAlign: 'center' }}>
               <Link to="/host" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '1rem', transition: 'opacity 0.2s' }}>
                 Want to host a game? <span style={{ color: 'var(--secondary)', fontWeight: 'bold' }}>Click here</span>
@@ -160,16 +167,14 @@ export default function ClientView() {
               ))}
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="btn btn-accent"
+            <ShinyButton
+              className="w-full text-xl z-10"
               onClick={handleReady}
               disabled={!name || !selectedEmoji}
               style={{ opacity: (!name || !selectedEmoji) ? 0.5 : 1 }}
             >
               {t('im_ready') || "I'm Ready!"}
-            </motion.button>
+            </ShinyButton>
           </motion.div>
         )}
 
@@ -196,9 +201,14 @@ export default function ClientView() {
         {phase === 'role_reveal' && (
           <motion.div
             key="role_reveal"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '20px' }}
+            initial={{ scale: 0.1, opacity: 0, rotate: -10 }}
+            animate={
+              isImposterAware 
+                ? { scale: 1, opacity: 1, rotate: [-5, 5, -5, 5, 0], x: [-10, 10, -10, 10, 0] } // Screen shake for imposter
+                : { scale: 1, opacity: 1, rotate: 0 }
+            }
+            transition={{ type: 'spring', damping: 12, stiffness: 200 }}
+            className="flex-1 flex flex-col justify-center items-center text-center p-6 z-10"
           >
             {isImposterAware ? (
               <>
