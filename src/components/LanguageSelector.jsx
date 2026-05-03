@@ -36,50 +36,52 @@ export default function LanguageSelector() {
         {currentLang.flag}
       </button>
 
-      <AnimatePresence>
-        {isOpen && createPortal(
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-          >
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="w-full max-w-2xl bg-slate-800/90 rounded-3xl border border-white/20 p-8 shadow-2xl relative overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
             >
-              {/* Background Accents */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
-              
-              <h2 className="text-3xl font-black text-white text-center mb-8 tracking-wide drop-shadow-md relative z-10">{t('LANGUAGE_SELECT') || 'Select Language'}</h2>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
-                {LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => changeLanguage(lang.code)}
-                    className={`flex flex-col items-center justify-center gap-3 p-6 rounded-2xl transition-all ${lang.code === currentLang.code ? 'bg-cyan-500 text-slate-900 scale-105 shadow-lg shadow-cyan-500/30' : 'bg-white/5 hover:bg-white/15 text-white hover:scale-105'}`}
-                  >
-                    <span className="text-4xl drop-shadow-sm">{lang.flag}</span>
-                    <span className="text-lg font-bold">{lang.name}</span>
-                  </button>
-                ))}
-              </div>
-
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="mt-8 w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xl transition-all active:scale-95 relative z-10"
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="w-full max-w-2xl bg-slate-800/90 rounded-3xl border border-white/20 p-8 shadow-2xl relative overflow-hidden"
               >
-                {t('BACK') || 'Close'}
-              </button>
+                {/* Background Accents */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+                
+                <h2 className="text-3xl font-black text-white text-center mb-8 tracking-wide drop-shadow-md relative z-10">{t('LANGUAGE_SELECT') || 'Select Language'}</h2>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => changeLanguage(lang.code)}
+                      className={`flex flex-col items-center justify-center gap-3 p-6 rounded-2xl transition-all ${lang.code === currentLang.code ? 'bg-cyan-500 text-slate-900 scale-105 shadow-lg shadow-cyan-500/30' : 'bg-white/5 hover:bg-white/15 text-white hover:scale-105'}`}
+                    >
+                      <span className="text-4xl drop-shadow-sm">{lang.flag}</span>
+                      <span className="text-lg font-bold">{lang.name}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="mt-8 w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xl transition-all active:scale-95 relative z-10"
+                >
+                  {t('BACK') || 'Close'}
+                </button>
+              </motion.div>
             </motion.div>
-          </motion.div>,
-          document.body
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }

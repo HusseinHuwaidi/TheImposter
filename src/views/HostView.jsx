@@ -15,6 +15,7 @@ import { AnimatedGridPattern } from '../components/ui/AnimatedGridPattern';
 import { TextReveal } from '../components/ui/TextReveal';
 import { MagneticButton } from '../components/ui/MagneticButton';
 import { useRetroAudio } from '../hooks/useRetroAudio';
+import { useKeygenAudio } from '../hooks/useKeygenAudio';
 
 export default function HostView() {
   const { i18n, t } = useTranslation();
@@ -38,7 +39,8 @@ export default function HostView() {
   const [gameConfig, setGameConfig] = useState({ category: '', subject: null, decoySubject: null, imposterId: null, hardMode: false });
   const [turnState, setTurnState] = useState({ askerIndex: 0, answererIndex: 1 });
   const [votes, setVotes] = useState({});
-  const { playCategoryHover, playCategorySelect, toggleBgm, isBgmPlaying, initAudio } = useRetroAudio();
+  const { playCategoryHover, playCategorySelect, initAudio } = useRetroAudio();
+  const { toggleBgm, nextTrack, prevTrack, isBgmPlaying, isReady } = useKeygenAudio();
 
   // Start audio context on first interaction
   useEffect(() => {
@@ -239,13 +241,29 @@ export default function HostView() {
                 <h2 className="text-2xl md:text-3xl font-bold">{t('SETUP_TITLE') || 'Game Setup'}</h2>
                 
                 <div className="flex items-center gap-3">
-                  <button 
-                    onClick={toggleBgm} 
-                    className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl transition-all text-xl md:text-2xl ${isBgmPlaying ? 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.5)] scale-105' : 'bg-white/5 hover:bg-white/10'}`}
-                    title="Toggle SEGA Background Music"
-                  >
-                    {isBgmPlaying ? '🎵' : '🔇'}
-                  </button>
+                  <div className="flex bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+                    <button 
+                      onClick={prevTrack} 
+                      className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 hover:bg-white/10 transition-all text-sm md:text-lg"
+                      title="Previous Track"
+                    >
+                      ⏮️
+                    </button>
+                    <button 
+                      onClick={toggleBgm} 
+                      className={`flex items-center justify-center w-10 h-10 md:w-12 md:h-12 transition-all text-xl md:text-2xl ${isBgmPlaying ? 'bg-cyan-500/20 text-cyan-400' : 'hover:bg-white/10'}`}
+                      title="Toggle Keygen Music"
+                    >
+                      {isBgmPlaying ? '🎵' : '🔇'}
+                    </button>
+                    <button 
+                      onClick={nextTrack} 
+                      className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 hover:bg-white/10 transition-all text-sm md:text-lg"
+                      title="Next Track"
+                    >
+                      ⏭️
+                    </button>
+                  </div>
 
                   <label className="flex items-center gap-3 cursor-pointer group bg-white/5 px-4 py-2 rounded-xl hover:bg-white/10 transition-colors h-10 md:h-12">
                     <div className="font-bold text-sm md:text-lg text-pink-400">{t('HARD_MODE') || 'Hard Mode'}</div>
@@ -260,8 +278,8 @@ export default function HostView() {
 
               <div className="font-bold mb-6 text-lg md:text-xl shrink-0 text-center text-cyan-400 uppercase tracking-widest">{t('SELECT_CATEGORY') || 'Choose a Category'}</div>
               
-              {/* Category Grid - Uniform grid to fill space without void */}
-              <div className="grid grid-cols-3 lg:grid-cols-4 place-items-center gap-4 md:gap-6 mb-8 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-[150px]">
+              {/* Category Grid - Uniform grid to fill space without void and prevent scrolling */}
+              <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 place-items-center gap-2 md:gap-4 mb-4 flex-1 min-h-[150px] w-full items-center justify-center">
                 {[
                   { id: 'random', icon: '🎲' },
                   { id: 'food', icon: '🍔' },
@@ -283,7 +301,7 @@ export default function HostView() {
                       playCategorySelect();
                       setSelectedCategory(cat.id);
                     }}
-                    className={`text-6xl md:text-8xl transition-all duration-300 hover:scale-110 ${selectedCategory === cat.id ? 'scale-125 drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100 z-10 brightness-110' : 'opacity-40 hover:opacity-80 grayscale-[50%]'}`}
+                    className={`text-5xl md:text-6xl xl:text-7xl transition-all duration-300 hover:scale-110 ${selectedCategory === cat.id ? 'scale-125 drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100 z-10 brightness-110' : 'opacity-40 hover:opacity-80 grayscale-[50%]'}`}
                   >
                     {cat.icon}
                   </button>
