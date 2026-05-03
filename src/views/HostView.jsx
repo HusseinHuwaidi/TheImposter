@@ -252,7 +252,7 @@ export default function HostView() {
               </div>
               
               <h2 className="text-lg md:text-xl">{t('game_pin')}</h2>
-              <div className="text-3xl md:text-4xl font-black tracking-widest text-white drop-shadow-md">
+              <div className="text-2xl md:text-3xl font-black tracking-widest text-white drop-shadow-md">
                 <TextReveal text={pin} className="justify-center" />
               </div>
               
@@ -316,7 +316,7 @@ export default function HostView() {
               )}
 
             <ShinyButton
-              className="w-full py-3 text-sm mb-4"
+              className="w-full py-3 text-sm mb-8"
               onClick={startGame}
             >
               {t('START_GAME') || t('start_game')}
