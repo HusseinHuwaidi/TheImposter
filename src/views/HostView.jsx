@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 
 import { supabase } from '../lib/supabase';
+import AdBanner from '../components/AdBanner';
 
 export default function HostView() {
   const [pin, setPin] = useState('');
@@ -172,10 +173,12 @@ export default function HostView() {
 
           </motion.div>
           
-          {/* Ad Placeholder Space */}
-          <div style={{ width: '300px', background: 'rgba(0,0,0,0.3)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Advertisement</span>
-            <div style={{ marginTop: '20px', width: '250px', height: '250px', border: '2px dashed rgba(255,255,255,0.2)' }}></div>
+          {/* Interstitial Ad Space */}
+          <div style={{ width: '300px', background: 'rgba(0,0,0,0.3)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', overflow: 'hidden' }}>
+            <AdBanner 
+              slotId="YOUR_INTERSTITIAL_SLOT_ID" 
+              style={{ width: '300px', height: '600px' }} 
+            />
           </div>
         </div>
       )}

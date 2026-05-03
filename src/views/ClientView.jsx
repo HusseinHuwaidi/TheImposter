@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
+import AdBanner from '../components/AdBanner';
 
 const EMOJIS = ['😎', '🤠', '👽', '👻', '🤖', '💩', '🦄', '🦖'];
 const AVATARS = ['boy', 'girl', 'bear', 'cat']; // We can map these to images later
@@ -189,8 +190,11 @@ export default function ClientView() {
       </AnimatePresence>
 
       {/* Persistent Ad Banner at the bottom */}
-      <div className="ad-banner">
-        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>Advertisement</span>
+      <div className="ad-banner" style={{ overflow: 'hidden' }}>
+        <AdBanner 
+          slotId="YOUR_BANNER_SLOT_ID" 
+          style={{ width: '100%', height: '60px' }} 
+        />
       </div>
     </div>
   );
